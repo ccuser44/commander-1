@@ -1,3 +1,1 @@
-local MainModule = require(script.MainModule)
-
-MainModule(script.Settings, script.Packages)
+require(script.MainModule)(script.Settings, script.Packages)
