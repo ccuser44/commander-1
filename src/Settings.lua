@@ -1,5 +1,5 @@
 return {
-    Permission = {
+    Permissions = {
         {
             Type = "Group",
             Group = "Moderator",
@@ -39,7 +39,7 @@ return {
         },
     },
 
-    DataStore = {
+    DataStores = {
         BanKey = "commander.bans",
         ConfigurationKey = "commander.config",
         LogKey = "commander.log",
