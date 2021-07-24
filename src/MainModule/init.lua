@@ -135,8 +135,12 @@ return function(settings, userPackages)
         end
     end
 
-    for _, package in ipairs(loadedPackages) do
-
+    for _, package in ipairs(loadedPackages.Plugin) do
+        if typeof(package.Target) == "table" and package.Target.Init then
+            dLog("Wait", "Initializing plugin " .. package.Name .. "...")
+            package.Target:Init()
+            dLog("Success", "Initialized plugin " .. package.Name)
+        end
     end
 
     dLog("Success", "Finished initializing all packages...")
