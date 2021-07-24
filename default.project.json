@@ -1,0 +1,12 @@
+{
+    "name": "Commander",
+    "tree": {
+        "$className": "DataModel",
+        "ServerScriptService": {
+            "$className": "ServerScriptService",
+            "Commander": {
+                "$path": "src"
+            } 
+        }
+    }
+}
