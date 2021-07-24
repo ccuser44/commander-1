@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local assets = script.Assets
 local core = script.Core
-local packages = script.Packages
+local packages
 local preloaded = core.Preloaded
 
 local DEBUG_MODE = true
@@ -56,6 +56,8 @@ return function(settings, userPackages)
     Instance.new("RemoteFunction", ReplicatedStorage.Commander)
     dLog("Success", "Initialized remotes...")
 
+    packages = Instance.new("Folder", script)
+    packages.Name = "Packages"
     Instance.new("Folder", packages).Name = "Commands"
     Instance.new("Folder", packages.Commands).Name = "Server"
     Instance.new("Folder", packages.Commands).Name = "Player"
@@ -78,7 +80,7 @@ return function(settings, userPackages)
 
             if utilities.Validify.validatePkg(requiredPackage) then
                 dLog("Success", package.Name .. " is a valid package...")
-                if packages.Class ~= "Command" then
+                if requiredPackage.Class ~= "Command" then
                     package.Parent = packages[requiredPackage.Class]
                 else
                     package.Parent = packages.Commands[requiredPackage.Category]
