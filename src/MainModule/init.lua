@@ -7,14 +7,22 @@ local preloaded = core.Preloaded
 
 local DEBUG_MODE = true
 local LOG_CONTEXTS = {
-    Wait = "Commander; ⏳ %s",
-    Warn = "Commander; ⚠️ %s",
-    Success = "Commander; ✅ %s",
-    Error = "Commander; 🚫 %s",
-    Confusion = "Commander; 🤷🏻‍♂️ %s",
-    Info = "Commander; ℹ️ %s"
+    ["Wait"] = "Commander; ⏳ %s",
+    ["Warn"] = "Commander; ⚠️ %s",
+    ["Success"] = "Commander; ✅ %s",
+    ["Error"] = "Commander; 🚫 %s",
+    ["Confusion"] = "Commander; 🤷🏻‍♂️ %s",
+    ["Info"] = "Commander; ℹ️ %s"
 }
 local utilities = {}
+local loadedPackages = {
+    ["Command"] = {
+        ["Server"] = {},
+        ["Player"] = {}
+    },
+    ["Stylesheet"] = {},
+    ["Plugin"] = {}
+}
 
 local function dLog(context, ...)
     if DEBUG_MODE then
@@ -34,6 +42,16 @@ local function assert(condition, ...)
     if not condition then
         error(string.format(LOG_CONTEXTS.Error, ...))
     end
+end
+
+function copyTable(table)
+    if typeof(table) ~= "table" then return table end
+    local result = setmetatable({}, getmetatable(table))
+    for index, value in ipairs(table) do
+        result[copyTable(index)] = copyTable(value)
+    end
+
+    return result
 end
 
 dLog("Info", "Welcome to V2")
@@ -92,5 +110,36 @@ return function(settings, userPackages)
         end
     end
 
+    dLog("Wait", "Setting up packages...")
+    for _, package in ipairs(packages:GetDescendants()) do
+        if package:IsA("ModuleScript") then
+            package = require(package)
+            local packageInfo = {
+                ["Name"] = package.Name,
+                ["Description"] = package.Description,
+                ["Class"] = package.Class,
+                ["Category"] = package.Category or "N/A",
+                ["Author"] = package.Author,
+                ["Target"] = package.Target
+            }
+
+            package.Settings = copyTable(settings)
+            package.API = utilities.API
+            package.Util = utilities
+
+            if package.Class == "Command" then
+                loadedPackages.Command[package.Category][package.Name] = packageInfo
+            else
+                loadedPackages[package.Class][package.Name] = packageInfo
+            end
+        end
+    end
+
+    for _, package in ipairs(loadedPackages) do
+
+    end
+
     dLog("Success", "Finished initializing all packages...")
+    dLog("Wait", "Connecting to remotes...")
+
 end

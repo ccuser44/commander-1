@@ -4,8 +4,8 @@ local acceptedPkgClass = {"Command", "Stylesheet", "Plugin"}
 local acceptedCommandCategory = {"Player", "Server"}
 
 function Validify.validatePkg(pkgTable)
-    if type(pkgTable) == "table" then
-        if pkgTable.Name and pkgTable.Description and pkgTable.Class then
+    if typeof(pkgTable) == "table" then
+        if pkgTable.Name and pkgTable.Description and pkgTable.Class and pkgTable.Author then
             if table.find(acceptedPkgClass, pkgTable.Class) then
                 if pkgTable.Class == "Command" and table.find(acceptedCommandCategory, pkgTable.Category) then
                     return true
