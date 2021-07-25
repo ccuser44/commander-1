@@ -3,7 +3,7 @@ return {
         {
             Type = "Group",
             Group = "Moderator",
-            Authorize = "1",
+            Authorize = "3430014",
             Range = {1, 255},
             AcceptEqual = true,
         },
