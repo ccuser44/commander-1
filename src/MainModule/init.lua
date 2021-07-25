@@ -1,19 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 
 local assets = script.Assets
 local core = script.Core
 local packages
 local preloaded = core.Preloaded
+local dLog = require(core.dLog)
 
-local DEBUG_MODE = true
-local LOG_CONTEXTS = {
-    ["Wait"] = "Commander; ⏳ %s",
-    ["Warn"] = "Commander; ⚠️ %s",
-    ["Success"] = "Commander; ✅ %s",
-    ["Error"] = "Commander; 🚫 %s",
-    ["Confusion"] = "Commander; 🤷🏻‍♂️ %s",
-    ["Info"] = "Commander; ℹ️ %s"
-}
 local utilities = {}
 local loadedPackages = {
     ["Command"] = {
@@ -24,23 +17,9 @@ local loadedPackages = {
     ["Plugin"] = {}
 }
 
-local function dLog(context, ...)
-    if DEBUG_MODE then
-        if LOG_CONTEXTS[context] then
-            if context == "Error" then
-                error(string.format(LOG_CONTEXTS[context], ...))
-            elseif context == "Warn" then
-                warn(string.format(LOG_CONTEXTS[context], ...))
-            else
-                print(string.format(LOG_CONTEXTS[context], ...))
-            end
-        end
-    end
-end
-
 local function assert(condition, ...)
     if not condition then
-        error(string.format(LOG_CONTEXTS.Error, ...))
+        error(string.format("Commander; 🚫 %s", ...))
     end
 end
 
@@ -55,14 +34,6 @@ function copyTable(table)
 end
 
 dLog("Info", "Welcome to V2")
-dLog("Wait", "Loading all preloaded components...")
-for _, component in ipairs(preloaded:GetChildren()) do
-    if component:IsA("ModuleScript") then
-        utilities[component.Name] = require(component)
-        dLog("Success", "Loaded component " .. component.Name)
-    end
-end
-dLog("Success", "Complete, listening for requests...")
 
 return function(settings, userPackages)
     assert(settings, "User configuration found missing, aborted!")
@@ -76,16 +47,24 @@ return function(settings, userPackages)
 
     packages = Instance.new("Folder", script)
     packages.Name = "Packages"
-    Instance.new("Folder", packages).Name = "Commands"
-    Instance.new("Folder", packages.Commands).Name = "Server"
-    Instance.new("Folder", packages.Commands).Name = "Player"
-    Instance.new("Folder", packages).Name = "Stylesheets"
-    Instance.new("Folder", packages).Name = "Plugins"
+    Instance.new("Folder", packages).Name = "Command"
+    Instance.new("Folder", packages.Command).Name = "Server"
+    Instance.new("Folder", packages.Command).Name = "Player"
+    Instance.new("Folder", packages).Name = "Stylesheet"
+    Instance.new("Folder", packages).Name = "Plugin"
     dLog("Success", "Initialized package system...")
 
     settings.Name = "Settings"
     settings.Parent = core
     dLog("Success", "Loaded user configuration...")
+    dLog("Wait", "Loading all preloaded components...")
+    for _, component in ipairs(preloaded:GetChildren()) do
+        if component:IsA("ModuleScript") then
+            utilities[component.Name] = require(component)
+            dLog("Success", "Loaded component " .. component.Name)
+        end
+    end
+    dLog("Success", "Complete loading all preloaded components, moving on...")
 
     if #userPackages:GetDescendants() == 0 then
         dLog("Warn", "There was no package to load with...")
@@ -101,7 +80,7 @@ return function(settings, userPackages)
                 if requiredPackage.Class ~= "Command" then
                     package.Parent = packages[requiredPackage.Class]
                 else
-                    package.Parent = packages.Commands[requiredPackage.Category]
+                    package.Parent = packages.Command[requiredPackage.Category]
                 end
                 dLog("Success", "Complete initializing package " .. package.Name ..", moving on...")
             else
@@ -125,6 +104,7 @@ return function(settings, userPackages)
 
             package.Settings = copyTable(settings)
             package.API = utilities.API
+            package.Core = core
             package.Util = utilities
 
             if package.Class == "Command" then
@@ -135,7 +115,7 @@ return function(settings, userPackages)
         end
     end
 
-    for _, package in ipairs(loadedPackages.Plugin) do
+    for _, package in pairs(loadedPackages.Plugin) do
         if typeof(package.Target) == "table" and package.Target.Init then
             dLog("Wait", "Initializing plugin " .. package.Name .. "...")
             package.Target:Init()
@@ -145,5 +125,11 @@ return function(settings, userPackages)
 
     dLog("Success", "Finished initializing all packages...")
     dLog("Wait", "Connecting to remotes...")
-
+    dLog("Success", "Connected")
+    dLog("Wait", "Connecting player events and initializing for players...")
+    wait(5)
+    for _, player in ipairs(Players:GetPlayers()) do
+        utilities.API.initializePlayer(player)
+    end
+    dLog("Success", "Done")
 end
