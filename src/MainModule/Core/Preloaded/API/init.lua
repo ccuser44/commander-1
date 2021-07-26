@@ -42,6 +42,7 @@ function API.addChecker(name, checkerFunction)
 end
 
 function API.initializePlayer(player)
+    if CollectionService:HasTag(player, "Commander_Loaded") then return end
     local currentIndex
     dLog("Info", "Received request")
     for name, checker in pairs(API.Checkers) do
