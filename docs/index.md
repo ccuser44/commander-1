@@ -1,4 +1,4 @@
-# Welcome to the official documentation for Commander
+# Home
 
 Commander is an open sourced administration panel meant to be used in Roblox experiences, to provide a much intuitive and easygoing way to do game moderation. Created by programmers and artists around the world with love.
 
