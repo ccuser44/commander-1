@@ -36,7 +36,7 @@ local function checkGroupRank(groupsInfo, groupId, ranks, allowEqual)
     end
 end
 
-function PackageTarget.OnInvoke(userId)
+function PackageTarget.onInvoke(userId)
     local currentIndex = 0
     for _, permission in ipairs(PackageTarget.Settings.Permissions) do
         if permission.Type == "Group" then
@@ -83,7 +83,7 @@ function PackageTarget:Init()
     end
 
 
-    Package.API.addChecker("Group", PackageTarget.OnInvoke)
+    Package.API.addChecker("Group", PackageTarget.onInvoke)
 end
 
 Package = {

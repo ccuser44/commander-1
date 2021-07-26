@@ -16,7 +16,7 @@ local function safePcall(functionToCall, ...)
     return success, result
 end
 
-function PackageTarget.OnInvoke(userId)
+function PackageTarget.onInvoke(userId)
     local success, username = safePcall(Players.GetNameFromUserIdAsync, Players, userId)
     local currentIndex = 0
 
@@ -67,7 +67,7 @@ function PackageTarget:Init()
         PackageTarget.GroupsIndex[group.Name] = index
     end
 
-    Package.API.addChecker("User", PackageTarget.OnInvoke)
+    Package.API.addChecker("User", PackageTarget.onInvoke)
 end
 
 Package = {
