@@ -1,5 +1,10 @@
-local Package
-local PackageTarget = {}
+local package = {
+    Name = "UserChecker",
+    Description = "Adds Username/UserId support to the API's admin checking function",
+    Author = "7kayoh",
+    Class = "Plugin",
+    Target = {}
+}
 
 local Players = game:GetService("Players")
 
@@ -16,11 +21,11 @@ local function safePcall(functionToCall, ...)
     return success, result
 end
 
-function PackageTarget.onInvoke(userId)
+function package.Target.onInvoke(userId)
     local success, username = safePcall(Players.GetNameFromUserIdAsync, Players, userId)
     local currentIndex = 0
 
-    for _, permission in ipairs(PackageTarget.Settings.Permissions) do
+    for _, permission in ipairs(package.Target.Settings.Permissions) do
         local allowed = nil
         if typeof(permission.Authorize) == "table" then
             if permission.Type == "UserId" then
@@ -45,12 +50,12 @@ function PackageTarget.onInvoke(userId)
         end
 
         if allowed then
-            local groupIndex = PackageTarget.GroupsIndex[permission.Group]
+            local groupIndex = package.Target.GroupsIndex[permission.Group]
             if currentIndex < groupIndex then
                 currentIndex = groupIndex
             end
 
-            if groupIndex == #PackageTarget.Settings.Groups then
+            if groupIndex == #package.Target.Settings.Groups then
                 break
             end
         end
@@ -59,23 +64,15 @@ function PackageTarget.onInvoke(userId)
     return currentIndex
 end
 
-function PackageTarget:Init()
-    PackageTarget.Settings = require(Package.Core.Settings)
-    PackageTarget.GroupsIndex = {}
+function package.Target:Init()
+    package.Target.Settings = require(package.Core.Settings)
+    package.Target.GroupsIndex = {}
 
-    for index, group in ipairs(PackageTarget.Settings.Groups) do
-        PackageTarget.GroupsIndex[group.Name] = index
+    for index, group in ipairs(package.Target.Settings.Groups) do
+        package.Target.GroupsIndex[group.Name] = index
     end
 
-    Package.API.addChecker("User", PackageTarget.onInvoke)
+    package.API.addChecker("User", package.Target.onInvoke)
 end
 
-Package = {
-    Name = "UserChecker",
-    Description = "Adds Username/UserId support to the API's admin checking function",
-    Author = "7kayoh",
-    Class = "Plugin",
-    Target = PackageTarget
-}
-
-return Package
+return package

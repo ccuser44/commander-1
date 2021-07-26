@@ -13,7 +13,7 @@ function package.Target.extenderFunction(player, wrapper)
 end
 
 function package.Target:Init()
-    package.Settings = require(package.Core.Settings)
+    package.Target.Settings = require(package.Core.Settings)
     package.API.extendPlayerWrapper(package.Target.extenderFunction)
 end
 

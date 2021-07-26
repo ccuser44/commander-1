@@ -1,5 +1,10 @@
-local Package
-local PackageTarget = {}
+local package = {
+    Name = "GroupsChecker",
+    Description = "Adds group support to the API's admin checking function",
+    Author = "7kayoh",
+    Class = "Plugin",
+    Target = {}
+}
 
 local GroupService = game:GetService("GroupService")
 
@@ -36,12 +41,12 @@ local function checkGroupRank(groupsInfo, groupId, ranks, allowEqual)
     end
 end
 
-function PackageTarget.onInvoke(userId)
+function package.Target.onInvoke(userId)
     local currentIndex = 0
-    for _, permission in ipairs(PackageTarget.Settings.Permissions) do
+    for _, permission in ipairs(package.Target.Settings.Permissions) do
         if permission.Type == "Group" then
             local allowed = nil
-            local groupIndex = PackageTarget.GroupsIndex[permission.Group]
+            local groupIndex = package.Target.GroupsIndex[permission.Group]
             local success, groupsInfo = safePcall(GroupService.GetGroupsAsync, GroupService, userId)
 
             if not success then return nil end
@@ -65,7 +70,7 @@ function PackageTarget.onInvoke(userId)
                 currentIndex = groupIndex
             end
 
-            if currentIndex == #PackageTarget.Settings.Groups then
+            if currentIndex == #package.Target.Settings.Groups then
                 break
             end
         end
@@ -74,24 +79,16 @@ function PackageTarget.onInvoke(userId)
     return currentIndex
 end
 
-function PackageTarget:Init()
-    PackageTarget.Settings = require(Package.Core.Settings)
-    PackageTarget.GroupsIndex = {}
+function package.Target:Init()
+    package.Target.Settings = require(package.Core.Settings)
+    package.Target.GroupsIndex = {}
 
-    for index, group in ipairs(PackageTarget.Settings.Groups) do
-        PackageTarget.GroupsIndex[group.Name] = index
+    for index, group in ipairs(package.Target.Settings.Groups) do
+        package.Target.GroupsIndex[group.Name] = index
     end
 
 
-    Package.API.addChecker("Group", PackageTarget.onInvoke)
+    package.API.addChecker("Group", package.Target.onInvoke)
 end
 
-Package = {
-    Name = "GroupsChecker",
-    Description = "Adds group support to the API's admin checking function",
-    Author = "7kayoh",
-    Class = "Plugin",
-    Target = PackageTarget
-}
-
-return Package
+return package
