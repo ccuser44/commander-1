@@ -127,7 +127,10 @@ return function(settings, userPackages)
     dLog("Wait", "Connecting to remotes...")
     dLog("Success", "Connected")
     dLog("Wait", "Connecting player events and initializing for players...")
-    wait(5)
+    Players.PlayerAdded:Connect(function(player)
+        utilities.API.initializePlayer(player)
+    end)
+    
     for _, player in ipairs(Players:GetPlayers()) do
         utilities.API.initializePlayer(player)
     end
