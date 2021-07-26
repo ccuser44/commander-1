@@ -1,0 +1,52 @@
+site_name: Commander
+site_description: 'Moderation redefined'
+site_author: 'Evo Incorp'
+docs_dir: docs/
+repo_name: 'Repository'
+repo_url: 'https://github.com/evoincorp/commander'
+plugins:
+  - search
+copyright: Copyright &copy; 2020 - 2021 Evo Incorp
+markdown_extensions:
+  - admonition
+  - pymdownx.keys
+  - pymdownx.tabbed
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - pymdownx.highlight
+  - footnotes
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.tasklist:
+     custom_checkbox: true
+theme:
+  name: 'material'
+  custom_dir: overrides
+  font: false
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.top
+    - header.autohide
+  favicon: assets/images/logo.png
+  logo: assets/images/logo.png
+  icon:
+    repo: fontawesome/brands/github-alt
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark theme
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to light theme

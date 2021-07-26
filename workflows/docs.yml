@@ -1,0 +1,21 @@
+name: Documentation Deployment
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - v2
+    paths:
+     - 'docs/**'
+     - 'mkdocs.yml'
+     - 'overrides/**'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: pip install mkdocs-material
+      - run: pip install pymdown-extensions
+      - run: mkdocs gh-deploy --force
