@@ -40,7 +40,7 @@ function PackageTarget.OnInvoke(userId)
     local currentIndex = 0
     for _, permission in ipairs(PackageTarget.Settings.Permissions) do
         if permission.Type == "Group" then
-            local allowed
+            local allowed = nil
             local groupIndex = PackageTarget.GroupsIndex[permission.Group]
             local success, groupsInfo = safePcall(GroupService.GetGroupsAsync, GroupService, userId)
 

@@ -21,7 +21,7 @@ function PackageTarget.OnInvoke(userId)
     local currentIndex = 0
 
     for _, permission in ipairs(PackageTarget.Settings.Permissions) do
-        local allowed
+        local allowed = nil
         if typeof(permission.Authorize) == "table" then
             if permission.Type == "UserId" then
                 for _, authorize in ipairs(permission.Authorize) do
