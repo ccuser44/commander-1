@@ -1,6 +1,8 @@
 local Package
 local PackageTarget = {}
 
+local Players = game:GetService("Players")
+
 local function safePcall(functionToCall, ...)
     local retries = 0
     local success, result = pcall(functionToCall, ...)
@@ -13,8 +15,48 @@ local function safePcall(functionToCall, ...)
 
     return success, result
 end
+
 function PackageTarget.OnInvoke(userId)
-    -- TODO
+    local success, username = safePcall(Players.GetNameFromUserIdAsync, Players, userId)
+    local currentIndex = 0
+
+    for _, permission in ipairs(PackageTarget.Settings.Permissions) do
+        local allowed
+        if typeof(permission.Authorize) == "table" then
+            if permission.Type == "UserId" then
+                for _, authorize in ipairs(permission.Authorize) do
+                    if authorize == tostring(userId) then
+                        allowed = true
+                    end
+                end
+            elseif success and permission.Type == "Username" then
+                for _, authorize in ipairs(permission.Authorize) do
+                    if authorize == username then
+                        allowed = true
+                    end
+                end
+            end
+        else
+            if permission.Type == "UserId" then
+                allowed = permission.Authorize == tostring(userId)
+            elseif success and permission.Type == "Username" then
+                allowed = permission.Authorize == username
+            end
+        end
+
+        if allowed then
+            local groupIndex = PackageTarget.GroupsIndex[permission.Group]
+            if currentIndex < groupIndex then
+                currentIndex = groupIndex
+            end
+
+            if groupIndex == #PackageTarget.Settings.Groups then
+                break
+            end
+        end
+    end
+
+    return currentIndex
 end
 
 function PackageTarget:Init()
@@ -25,7 +67,7 @@ function PackageTarget:Init()
         PackageTarget.GroupsIndex[group.Name] = index
     end
 
-    -- PackageTarget.API.addChecker("User", PackageTarget.OnInvoke)
+    Package.API.addChecker("User", PackageTarget.OnInvoke)
 end
 
 Package = {
