@@ -1,24 +1,59 @@
-# API Manual
-
+# API
 The API is a collection of reusable functions that helps to reduce the size of a package, or for developers to communicate with Commander externally. As the API is exposed to the server context, please be aware of backdoors, as they may have codes to intervene Commander.
 
 ## Use-cases
-
 The API offers opportunities for developers to create lightweight, safe and stable packages for Commander without putting too much focus on compatability. Here are the reasons why you should consider using the API instead of reinventing the wheels:
 
 - Maintained by the official developers
+
 The API is always up-to-date with the entire codebase and has been seriously tested before release, it is by far the most optimal way to create scalable packages.
 
 - Code safety
+
 All code found in the API is coded with caution, the chances of it breaking out of random is rare and physically impossible to happen.
 
 - Saves line
+
 With the use of the API, you can easily make your package extremely lightweight, as majority of the code has been replaced by API methods instead.
 
 ## Methods
+### Players
+#### API.checkUserAdmin
+!!! abstract "`boolean` API.checkuserAdmin(`player` Player)" 
+    Returns the administrator status of the user,
 
-### API.addChecker(name: string, checkerFunction: function) -> void
-Loads in a checker given in the function call, will be called when a player joins.
+#### API.getAdminStatusWithUserId
+!!! abstract "`number, string` API.getAdminStatusWithUserId(`integer` UserId)" 
+    Returns the administration group index and name of the player is in. This method is for when the player is not ingame.
 
-### API.checkUserAdmin(player) -> boolean
-Returns the player's administrator status
+#### API.getAdminLevel
+!!! abstract "`number, string` API.getAdminLevel(`player` Player)" 
+    Returns the administration group index and name of the player is in.
+
+#### API.initializePlayer
+!!! abstract "`nil` API.initializePlayer(`player` Player)" 
+    Initializes the player, this is not needed as Commander already calls this to every player by default.
+
+#### API.wrapPlayer
+!!! abstract "`table` API.wrapPlayer(`player` Player)" 
+    Returns a wrapper of the player. By default, the wrapper contains the following elements:
+
+    ```lua
+    {
+        ["Name"] = Player.Name,
+        ["DisplayName"] = Player.DisplayName,
+        ["UserId"] = Player.UserId,
+        ["Character"] = Player.Character,
+        ["IsAdmin"] = API.checkUserAdmin(Player),
+        ["_instance"] = Player
+    }
+    ```
+
+### Misc
+#### API.addChecker
+!!! abstract "`nil` API.addChecker(`string` Name, `function` Checker)" 
+    Loads in a checker given in the function call, will be called when a player joins.
+
+#### API.extendPlayerWrapper
+!!! abstract "`nil` API.extendPlayerWrapper(`function` Extender)" 
+    Loads in an extender given in the function call, will be called when .wrapPlayer is requested.

@@ -8,14 +8,33 @@ plugins:
   - search
 copyright: Copyright &copy; 2020 - 2021 Evo Incorp
 markdown_extensions:
+  - attr_list
   - admonition
+  - codehilite:
+        guess_lang: false
+  - toc:
+        permalink: true
+  - def_list
+  - meta
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+        smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.inlinehilite
   - pymdownx.keys
-  - pymdownx.tabbed
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
   - pymdownx.superfences
+  - pymdownx.tasklist:
+        custom_checkbox: true
+  - pymdownx.tilde
+  - pymdownx.tabbed
   - pymdownx.snippets
   - pymdownx.highlight
   - footnotes
-  - attr_list
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
