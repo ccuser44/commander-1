@@ -12,7 +12,7 @@ return function(context, ...)
     if DEBUG_MODE then
         if LOG_CONTEXTS[context] then
             if context == "Error" then
-                error(string.format(LOG_CONTEXTS[context], ...))
+                error(string.format(LOG_CONTEXTS[context], ...), 2)
             elseif context == "Warn" then
                 warn(string.format(LOG_CONTEXTS[context], ...))
             else

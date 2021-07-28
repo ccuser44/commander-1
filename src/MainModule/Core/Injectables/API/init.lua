@@ -1,4 +1,5 @@
 local API = {}
+API.Remotes = {}
 API.Checkers = {}
 API.Extenders = {
     PlayerWrapper = {}
@@ -86,6 +87,21 @@ function API.wrapPlayer(player)
     return wrapper
 end
 
+function API.addRemoteTask(remoteType, qualifier, handler)
+    assert(remoteType == "Function" or remoteType == "Event", "Invalid remote type, expects either Function or Event")
+    local task = {}
+    task._remoteType = remoteType
+    task._handler = handler
+    task._qualifier = qualifier or function() return true end
+
+    function task.leave()
+        table.remove(API.Remotes[remoteType], table.find(API.Remotes[remoteType], handler))
+    end
+
+    table.insert(API.Remotes[remoteType], task)
+    return task
+end
+
 function API.addChecker(name, checkerFunction)
     dLog("Success", "Added checker " .. name .. ", got " .. #API.Checkers .. " checkers so far")
     API.Checkers[name] = checkerFunction
@@ -93,6 +109,27 @@ end
 
 function API.extendPlayerWrapper(extender)
     table.insert(API.Extenders.PlayerWrapper, extender)
+end
+
+function API.initialize(remotes)
+    API.Remotes.Function = {}
+    API.Remotes.Event = {}
+
+    remotes.RemoteFunction.OnServerInvoke = function(player, requestType, ...)
+        for _, task in ipairs(API.Remotes.Function) do
+            if task.qualifier(player, requestType) then
+                return task._handler(player, requestType, ...)
+            end
+        end
+    end
+
+    remotes.RemoteEvent.OnServerEvent:Connect(function(player, requestType, ...)
+        for _, task in ipairs(API.Remotes.Event) do
+            if task.qualifier(player, requestType) then
+                task._handler(player, requestType, ...)
+            end
+        end
+    end)
 end
 
 return API

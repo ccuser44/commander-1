@@ -1,13 +1,17 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
-local assets = script.Assets
-local core = script.Core
-local packages
-local preloaded = core.Preloaded
-local dLog = require(core.dLog)
+local assetsFolder = script.Assets
+local coreFolder = script.Core
+local injectablesFolder = coreFolder.Injectables
+local packagesFolder = nil
+local remotesFolder = nil
 
-local utilities = {}
+local dLog = require(coreFolder.dLog)
+local constants = require(coreFolder.Constants)
+local validify = require(coreFolder.Validify)
+
+local injectables = {}
 local loadedPackages = {
     ["Command"] = {
         ["Server"] = {},
@@ -19,8 +23,16 @@ local loadedPackages = {
 
 local function assert(condition, ...)
     if not condition then
-        error(string.format("Commander; 🚫 %s", ...))
+        error(string.format("Commander; 🚫 %s", ...), 2)
     end
+end
+
+local function onCommandInvoke(Player, requestType, ...)
+    local arguments = {...}
+    local commandName = arguments[1]
+    -- TODO
+
+    return nil
 end
 
 function copyTable(table)
@@ -40,27 +52,28 @@ return function(settings, userPackages)
     assert(settings, "User packages found missing, aborted!")
     dLog("Wait", "Starting system...")
 
-    Instance.new("Folder", ReplicatedStorage).Name = "Commander"
+    remotesFolder = Instance.new("Folder", ReplicatedStorage)
+    remotesFolder.Name = "Commander"
     Instance.new("RemoteEvent", ReplicatedStorage.Commander)
     Instance.new("RemoteFunction", ReplicatedStorage.Commander)
     dLog("Success", "Initialized remotes...")
 
-    packages = Instance.new("Folder", script)
-    packages.Name = "Packages"
-    Instance.new("Folder", packages).Name = "Command"
-    Instance.new("Folder", packages.Command).Name = "Server"
-    Instance.new("Folder", packages.Command).Name = "Player"
-    Instance.new("Folder", packages).Name = "Stylesheet"
-    Instance.new("Folder", packages).Name = "Plugin"
+    packagesFolder = Instance.new("Folder", script)
+    packagesFolder.Name = "Packages"
+    Instance.new("Folder", packagesFolder).Name = "Command"
+    Instance.new("Folder", packagesFolder.Command).Name = "Server"
+    Instance.new("Folder", packagesFolder.Command).Name = "Player"
+    Instance.new("Folder", packagesFolder).Name = "Stylesheet"
+    Instance.new("Folder", packagesFolder).Name = "Plugin"
     dLog("Success", "Initialized package system...")
 
     settings.Name = "Settings"
-    settings.Parent = core
+    settings.Parent = coreFolder
     dLog("Success", "Loaded user configuration...")
     dLog("Wait", "Loading all preloaded components...")
-    for _, component in ipairs(preloaded:GetChildren()) do
+    for _, component in ipairs(injectablesFolder:GetChildren()) do
         if component:IsA("ModuleScript") then
-            utilities[component.Name] = require(component)
+            injectables[component.Name] = require(component)
             dLog("Success", "Loaded component " .. component.Name)
         end
     end
@@ -75,12 +88,12 @@ return function(settings, userPackages)
             dLog("Wait", "Initializing package " .. package.Name)
             local requiredPackage = require(package)
 
-            if utilities.Validify.validatePkg(requiredPackage) then
+            if validify.validatePkg(requiredPackage) then
                 dLog("Success", package.Name .. " is a valid package...")
                 if requiredPackage.Class ~= "Command" then
-                    package.Parent = packages[requiredPackage.Class]
+                    package.Parent = packagesFolder[requiredPackage.Class]
                 else
-                    package.Parent = packages.Command[requiredPackage.Category]
+                    package.Parent = packagesFolder.Command[requiredPackage.Category]
                 end
                 dLog("Success", "Complete initializing package " .. package.Name ..", moving on...")
             else
@@ -90,7 +103,7 @@ return function(settings, userPackages)
     end
 
     dLog("Wait", "Setting up packages...")
-    for _, package in ipairs(packages:GetDescendants()) do
+    for _, package in ipairs(packagesFolder:GetDescendants()) do
         if package:IsA("ModuleScript") then
             package = require(package)
             local packageInfo = {
@@ -103,9 +116,9 @@ return function(settings, userPackages)
             }
 
             package.Settings = copyTable(settings)
-            package.API = utilities.API
-            package.Core = core
-            package.Util = utilities
+            package.API = injectables.API
+            package.Core = coreFolder
+            package.Util = injectables
 
             if package.Class == "Command" then
                 loadedPackages.Command[package.Category][package.Name] = packageInfo
@@ -124,15 +137,26 @@ return function(settings, userPackages)
     end
 
     dLog("Success", "Finished initializing all packages...")
+    injectables.API.initialize(remotesFolder)
     dLog("Wait", "Connecting to remotes...")
+    injectables.API.addRemoteTask("Function", 
+        function(player, requestType) 
+            if requestType == "useCommand" and 
+            injectables.API.checkUserAdmin(player) then
+                return true
+            end
+        end, 
+        onCommandInvoke
+    )
+    
     dLog("Success", "Connected")
     dLog("Wait", "Connecting player events and initializing for players...")
     Players.PlayerAdded:Connect(function(player)
-        utilities.API.initializePlayer(player)
+        injectables.API.initializePlayer(player)
     end)
     
     for _, player in ipairs(Players:GetPlayers()) do
-        utilities.API.initializePlayer(player)
+        injectables.API.initializePlayer(player)
     end
     dLog("Success", "Done")
 end
