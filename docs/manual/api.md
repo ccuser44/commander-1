@@ -57,3 +57,23 @@ With the use of the API, you can easily make your package extremely lightweight,
 #### API.extendPlayerWrapper
 !!! abstract "`nil` API.extendPlayerWrapper(`function` Extender)" 
     Loads in an extender given in the function call, will be called when .wrapPlayer is requested.
+
+#### API.Initialize
+!!! abstract "`nil` API.Initialize(`Folder` remotesFolder)"
+    Avoid touching this part, this is meant to be used internally.
+
+#### API.addRemoteTask
+!!! abstract "`table` API.addRemoteTask(`string` remoteType, `function?` qualifier, `function` handler)" 
+    Adds a new task to the corresponding, useful when you want to listen RemoteFunction/Event requests.
+
+    Accepted remoteTypes: `"Function"`, `"Event"`
+
+    Returns a table, for you to remove the task once you no longer want to listen:
+
+    ```lua
+    local task = API.addRemoteTask("Function", nil, function(Player, requestType, ...)
+        return true
+    end)
+
+    task.leave() -- leaves
+    ```

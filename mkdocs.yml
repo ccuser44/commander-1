@@ -4,6 +4,7 @@ site_author: 'Evo Incorp'
 docs_dir: docs/
 repo_name: 'Repository'
 repo_url: 'https://github.com/evoincorp/commander'
+edit_uri: edit/v2/docs
 plugins:
   - search
 copyright: Copyright &copy; 2020 - 2021 Evo Incorp
@@ -47,9 +48,8 @@ theme:
   features:
     - navigation.instant
     - navigation.tracking
-    - navigation.tabs
     - navigation.top
-    - header.autohide
+    - toc.integrate
   favicon: assets/images/logo.png
   logo: assets/images/logo.png
   icon:
