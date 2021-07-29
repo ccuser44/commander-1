@@ -10,27 +10,36 @@ local remotesFolder = nil
 local dLog = require(coreFolder.dLog)
 local constants = require(coreFolder.Constants)
 local validify = require(coreFolder.Validify)
+local settings = nil
 
 local injectables = {}
 local loadedPackages = {
-    ["Command"] = {
-        ["Server"] = {},
-        ["Player"] = {}
-    },
+    ["Command"] = {["Server"] = {}, ["Player"] = {}},
     ["Stylesheet"] = {},
     ["Plugin"] = {}
 }
 
 local function assert(condition, ...)
-    if not condition then
-        error(string.format("Commander; 🚫 %s", ...), 2)
-    end
+    if not condition then error(string.format("Commander; 🚫 %s", ...), 2) end
 end
 
 local function onCommandInvoke(Player, requestType, ...)
     local arguments = {...}
-    local commandName = arguments[1]
-    -- TODO
+    local commandName, category = arguments[1], arguments[2]
+    local commandIndex = table.find(loadedPackages.Command[category],
+                                    commandName)
+    assert(category == "Server" or category == "Player",
+           "Expects category either Server or Player, got " .. category)
+    if commandIndex then
+        if table.find(settings.Groups[Player.AdminIndex].Commands, commandName) or
+            table.find(settings.Groups[Player.AdminIndex].Commands, "*") then
+            table.remove(arguments, 1)
+            table.remove(arguments, 2)
+            loadedPackages.Commands[category][commandIndex].Target(Player,
+                                                                   requestType,
+                                                                   arguments)
+        end
+    end
 
     return nil
 end
@@ -47,9 +56,9 @@ end
 
 dLog("Info", "Welcome to V2")
 
-return function(settings, userPackages)
-    assert(settings, "User configuration found missing, aborted!")
-    assert(settings, "User packages found missing, aborted!")
+return function(userSettings, userPackages)
+    assert(userSettings, "User configuration found missing, aborted!")
+    assert(userSettings, "User packages found missing, aborted!")
     dLog("Wait", "Starting system...")
 
     remotesFolder = Instance.new("Folder", ReplicatedStorage)
@@ -67,8 +76,9 @@ return function(settings, userPackages)
     Instance.new("Folder", packagesFolder).Name = "Plugin"
     dLog("Success", "Initialized package system...")
 
-    settings.Name = "Settings"
-    settings.Parent = coreFolder
+    userSettings.Name = "Settings"
+    userSettings.Parent = coreFolder
+    settings = userSettings
     dLog("Success", "Loaded user configuration...")
     dLog("Wait", "Loading all preloaded components...")
     for _, component in ipairs(injectablesFolder:GetChildren()) do
@@ -93,11 +103,15 @@ return function(settings, userPackages)
                 if requiredPackage.Class ~= "Command" then
                     package.Parent = packagesFolder[requiredPackage.Class]
                 else
-                    package.Parent = packagesFolder.Command[requiredPackage.Category]
+                    package.Parent =
+                        packagesFolder.Command[requiredPackage.Category]
                 end
-                dLog("Success", "Complete initializing package " .. package.Name ..", moving on...")
+                dLog("Success",
+                     "Complete initializing package " .. package.Name ..
+                         ", moving on...")
             else
-                dLog("Warn", "Package " .. package.Name .. " is not a valid package and has been ignored")
+                dLog("Warn", "Package " .. package.Name ..
+                         " is not a valid package and has been ignored")
             end
         end
     end
@@ -121,7 +135,8 @@ return function(settings, userPackages)
             package.Util = injectables
 
             if package.Class == "Command" then
-                loadedPackages.Command[package.Category][package.Name] = packageInfo
+                loadedPackages.Command[package.Category][package.Name] =
+                    packageInfo
             else
                 loadedPackages[package.Class][package.Name] = packageInfo
             end
@@ -139,22 +154,17 @@ return function(settings, userPackages)
     dLog("Success", "Finished initializing all packages...")
     injectables.API.initialize(remotesFolder)
     dLog("Wait", "Connecting to remotes...")
-    injectables.API.addRemoteTask("Function", 
-        function(player, requestType) 
-            if requestType == "useCommand" and 
-            injectables.API.checkUserAdmin(player) then
-                return true
-            end
-        end, 
-        onCommandInvoke
-    )
-    
+    injectables.API.addRemoteTask("Function", function(player, requestType)
+        if requestType == "useCommand" and
+            injectables.API.checkUserAdmin(player) then return true end
+    end, onCommandInvoke)
+
     dLog("Success", "Connected")
     dLog("Wait", "Connecting player events and initializing for players...")
     Players.PlayerAdded:Connect(function(player)
         injectables.API.initializePlayer(player)
     end)
-    
+
     for _, player in ipairs(Players:GetPlayers()) do
         injectables.API.initializePlayer(player)
     end
