@@ -77,3 +77,5 @@ With the use of the API, you can easily make your package extremely lightweight,
 
     task.leave() -- leaves
     ```
+
+    When a handler is being fired, you are expected to receive the player wrapper, the request type, and the arguments.
