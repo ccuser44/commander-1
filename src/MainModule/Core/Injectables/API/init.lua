@@ -116,6 +116,7 @@ function API.initialize(remotes)
     API.Remotes.Event = {}
 
     remotes.RemoteFunction.OnServerInvoke = function(player, requestType, ...)
+        player = API.wrapPlayer(player)
         for _, task in ipairs(API.Remotes.Function) do
             if task.qualifier(player, requestType) then
                 return task._handler(player, requestType, ...)
@@ -124,6 +125,7 @@ function API.initialize(remotes)
     end
 
     remotes.RemoteEvent.OnServerEvent:Connect(function(player, requestType, ...)
+        player = API.wrapPlayer(player)
         for _, task in ipairs(API.Remotes.Event) do
             if task.qualifier(player, requestType) then
                 task._handler(player, requestType, ...)
