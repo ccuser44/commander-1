@@ -26,11 +26,11 @@ end
 
 function API.getAdminStatusWithUserId(userId)
     local currentIndex
-    dLog("Info", "Received request")
+    dLog("Info", "Received request of " .. userId)
     for name, checker in pairs(API.Checkers) do
         dLog("Info", "At checker " .. name)
         local index = checker(userId)
-        dLog("Info", "Got index " .. index)
+        dLog("Info", "Got group index of " .. index)
         if index and (currentIndex or 0) < index then
             currentIndex = index
         else
