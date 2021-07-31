@@ -62,14 +62,6 @@ local function onCommandInvoke(player, requestType, ...)
     return false
 end
 
-local function onCommandInvokeQualifier(player, requestType)
-    if requestType == "useCommand" then
-        return injectables.API.checkUserAdmin(player)
-    end
-
-    return false
-end
-
 local function initPkg(pkg)
     if pkg:IsA("ModuleScript") then
         local requiredPkg = require(pkg)
@@ -183,7 +175,7 @@ return function(userSettings, userPkg)
     dLog("Success", "Initialized API")
     
     dLog("Wait", "Connect remotes")
-    injectables.API.addRemoteTask("Function", onCommandInvokeQualifier, onCommandInvoke)
+    injectables.API.addRemoteTask("Function", "onCommand", onCommandInvoke)
     dLog("Success", "Added an onCommandInvoke task for RemoteFunction")
     dLog("Success", "Connected remotes")
 
