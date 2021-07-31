@@ -92,7 +92,13 @@ function API.addRemoteTask(remoteType, qualifier, handler)
     local task = {}
     task._remoteType = remoteType
     task._handler = handler
-    task._qualifier = qualifier or function() return true end
+    if typeof(qualifier) == "string" then
+        task._qualifier = function(player, requestType)
+            return requestType == qualifier
+        end
+    else
+        task._qualifier = qualifier
+    end
 
     function task.leave()
         table.remove(API.Remotes[remoteType], table.find(API.Remotes[remoteType], handler))
@@ -128,7 +134,7 @@ function API.initialize(remotes)
         player = API.wrapPlayer(player)
         for _, task in ipairs(API.Remotes.Event) do
             if task.qualifier(player, requestType) then
-                task._handler(player, requestType, ...)
+                return task._handler(player, requestType, ...)
             end
         end
     end)
