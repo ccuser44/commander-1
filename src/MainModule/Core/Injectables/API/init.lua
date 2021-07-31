@@ -1,3 +1,5 @@
+--!strict
+
 local API = {}
 API.Remotes = {}
 API.Checkers = {}
@@ -8,12 +10,18 @@ API.Extenders = {
 local CollectionService = game:GetService("CollectionService")
 
 local core = script.Parent.Parent
-local settings = require(core.Settings)
+local settings = require(core:FindFirstChild("Settings"))
 local dLog = require(core.dLog)
 
-local function safePcall(functionToCall, ...)
-    local retries = 0
-    local success, result = pcall(functionToCall, ...)
+local function assert(condition: boolean, ...: any?)
+    if not condition then
+        dLog("Error", ...)
+    end
+end
+
+local function safePcall(functionToCall: (any?) -> any?, ...: any?): (boolean, any?)
+    local retries: number = 0
+    local success: boolean, result: any? = pcall(functionToCall, ...)
     
     while not success and retries < 3 do
         success, result = pcall(functionToCall, ...)
@@ -24,13 +32,13 @@ local function safePcall(functionToCall, ...)
     return success, result
 end
 
-function API.getAdminStatusWithUserId(userId)
-    local currentIndex
+function API.getAdminStatusWithUserId(userId: number): (number?, string?)
+    local currentIndex: number? = nil
     dLog("Info", "Received request of " .. userId)
     for name, checker in pairs(API.Checkers) do
         dLog("Info", "At checker " .. name)
-        local index = checker(userId)
-        dLog("Info", "Got group index of " .. index)
+        local index: number? = checker(userId)
+        dLog("Info", "Got group index of " .. tostring(index))
         if index and (currentIndex or 0) < index then
             currentIndex = index
         else
@@ -43,19 +51,21 @@ function API.getAdminStatusWithUserId(userId)
     end
 
     if currentIndex then
-        return currentIndex, settings.Groups[currentIndex].Name
+		return currentIndex, settings.Groups[currentIndex].Name
+	else
+		return nil, nil
     end
 end
 
-function API.getAdminLevel(player)
+function API.getAdminLevel(player: Player): (number?, string?)
     return player:GetAttribute("Commander_AdminIndex"), player:GetAttribute("Commander_AdminGroup")
 end
 
-function API.checkUserAdmin(player)
+function API.checkUserAdmin(player: Player): (boolean)
     return CollectionService:HasTag(player, "Commander_Admin")
 end
 
-function API.initializePlayer(player)
+function API.initializePlayer(player: Player)
     if CollectionService:HasTag(player, "Commander_Loaded") then return end
     local groupIndex, groupName = API.getAdminStatusWithUserId(player.UserId)
 
@@ -68,8 +78,8 @@ function API.initializePlayer(player)
     end
 end
 
-function API.wrapPlayer(player)
-    local wrapper = {
+function API.wrapPlayer(player: Player): any
+    local wrapper: any = { -- have to use any for the moment, figuring out
         ["Name"] = player.Name,
         ["DisplayName"] = player.DisplayName,
         ["UserId"] = player.UserId,
@@ -87,7 +97,7 @@ function API.wrapPlayer(player)
     return wrapper
 end
 
-function API.addRemoteTask(remoteType, qualifier, handler)
+function API.addRemoteTask(remoteType: string, qualifier, handler)
     assert(remoteType == "Function" or remoteType == "Event", "Invalid remote type, expects either Function or Event")
     local task = {}
     task._remoteType = remoteType
@@ -108,20 +118,25 @@ function API.addRemoteTask(remoteType, qualifier, handler)
     return task
 end
 
-function API.addChecker(name, checkerFunction)
+function API.addChecker(name: string, checkerFunction: (number?) -> boolean)
     dLog("Success", "Added checker " .. name .. ", got " .. #API.Checkers .. " checkers so far")
     API.Checkers[name] = checkerFunction
 end
 
-function API.extendPlayerWrapper(extender)
+function API.extendPlayerWrapper(extender: (Player) -> any?)
     table.insert(API.Extenders.PlayerWrapper, extender)
 end
 
-function API.initialize(remotes)
+function API.initialize(remotes: Folder)
+    local remoteFunction: RemoteFunction? = remotes:FindFirstChildOfClass("RemoteFunction")
+    local remoteEvent: RemoteEvent? = remotes:FindFirstChildOfClass("RemoteEvent")
     API.Remotes.Function = {}
     API.Remotes.Event = {}
 
-    remotes.RemoteFunction.OnServerInvoke = function(player, requestType, ...)
+    assert(remoteFunction and remoteEvent, "Can't find either RemoteFunction or RemoteEvent, aborting")
+    -- ^ Supposed to not warn about incorrect types!
+
+    remoteFunction.OnServerInvoke = function(player: Player, requestType: string, ...: any?): any?
         player = API.wrapPlayer(player)
         for _, task in ipairs(API.Remotes.Function) do
             if task.qualifier(player, requestType) then
@@ -130,7 +145,7 @@ function API.initialize(remotes)
         end
     end
 
-    remotes.RemoteEvent.OnServerEvent:Connect(function(player, requestType, ...)
+	remoteEvent.OnServerEvent:Connect(function(player: Player, requestType: string, ...: any?)
         player = API.wrapPlayer(player)
         for _, task in ipairs(API.Remotes.Event) do
             if task.qualifier(player, requestType) then

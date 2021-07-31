@@ -1,3 +1,5 @@
+--!strict
+
 --[[
     Log.lua
     =======
@@ -9,11 +11,16 @@
 
 local Log = {}
 
-function Log.getLogs()
+local DEFAULT_LOG_LIMIT = 100
+
+function Log.getLogs(limit: number?, page: number?): {any?}
+    limit = limit or DEFAULT_LOG_LIMIT
+    page = page or 1
+
 
 end
 
-function Log.write()
+function Log.write(user: string, action: string, target: string, attachment: {any?})
 
 end
 
