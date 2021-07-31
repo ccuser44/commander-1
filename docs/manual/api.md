@@ -63,7 +63,7 @@ With the use of the API, you can easily make your package extremely lightweight,
     Avoid touching this part, this is meant to be used internally.
 
 #### API.addRemoteTask
-!!! abstract "`table` API.addRemoteTask(`string` remoteType, `function?` qualifier, `function` handler)" 
+!!! abstract "`table` API.addRemoteTask(`string` remoteType, `function|string` qualifier, `function` handler)" 
     Adds a new task to the corresponding, useful when you want to listen RemoteFunction/Event requests.
 
     Accepted remoteTypes: `"Function"`, `"Event"`
@@ -71,7 +71,7 @@ With the use of the API, you can easily make your package extremely lightweight,
     Returns a table, for you to remove the task once you no longer want to listen:
 
     ```lua
-    local task = API.addRemoteTask("Function", nil, function(Player, requestType, ...)
+    local task = API.addRemoteTask("Function", "onRequest", function(player, requestType, ...)
         return true
     end)
 
