@@ -3,6 +3,7 @@ local package = {
     Description = "Adds Username/UserId support to the API's admin checking function",
     Author = "7kayoh",
     Class = "Plugin",
+    Category = "Server",
     Target = {}
 }
 

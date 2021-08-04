@@ -3,6 +3,7 @@ local package = {
     Description = "Reveals specific API methods to remote",
     Author = "7kayoh",
     Class = "Plugin",
+    Category = "Server",
     Target = {}
 }
 local allowedRequests = {

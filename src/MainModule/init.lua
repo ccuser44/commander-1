@@ -19,7 +19,10 @@ local loadedPkg = {
         ["Player"] = {}
     },
     ["Stylesheet"] = {},
-    ["Plugin"] = {}
+    ["Plugin"] = {
+        ["Server"] = {},
+        ["Client"] = {}
+    }
 }
 
 local function assert(condition, ...)
@@ -71,6 +74,8 @@ local function initPkg(pkg)
 
             if requiredPkg.Class == "Command" then
                 pkg.Parent = packagesFolder.Command[requiredPkg.Category]
+            elseif requiredPkg.Class == "Plugin" then
+                pkg.Parent = packagesFolder.Plugin[requiredPkg.Category]
             else
                 pkg.Parent = packagesFolder[requiredPkg.Class]
             end
@@ -110,7 +115,7 @@ local function loadPkg(pkg)
 end
 
 local function initPlugin(pkg)
-    if typeof(pkg.Target) == "table" and pkg.Target.Init then
+    if typeof(pkg.Target) == "table" and pkg.Category == "Server" and pkg.Target.Init then
         dLog("Wait", "Initialize plugin " .. pkg.Name)
         pkg.Target:Init()
         dLog("Success", "Initialized plugin " .. pkg.Name)

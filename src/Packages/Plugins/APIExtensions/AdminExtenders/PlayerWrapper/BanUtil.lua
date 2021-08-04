@@ -5,6 +5,7 @@ local package = {
     Description = "A plugin that adds a ban system to Commander, meant to be used with the command",
     Author = "7kayoh",
     Class = "Plugin",
+    Category = "Server",
     Target = {}
 }
 
