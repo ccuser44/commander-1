@@ -26,6 +26,25 @@ body {
     color: #acacac
 }
 
+.md-header__button.md-logo img, .md-header__button.md-logo svg {
+    width: 1.8rem;
+    height: 1.8rem
+}
+
+.md-header__button.md-logo {
+    padding: 0;
+    margin: 0;
+}
+
+.md-header__title {
+    margin-left: 0.6rem;
+    font-weight: 400;
+}
+
+.md-header__source {
+    margin-left: 0.15rem;
+}
+
 .md-header {
     border-bottom: .05rem solid var(--md-default-fg-color--lightest);
     color: #5a5a5a
