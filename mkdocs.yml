@@ -1,5 +1,5 @@
-site_name: Commander
-site_description: 'Moderation redefined'
+site_name: Commander Docs
+site_description: 'Open Source Administration Panel; Documentation for Commander 5'
 site_author: 'Evo Incorp'
 docs_dir: docs/
 repo_name: 'Repository'
@@ -44,7 +44,6 @@ markdown_extensions:
 theme:
   name: 'material'
   custom_dir: overrides
-  font: false
   features:
     - navigation.instant
     - navigation.tracking
@@ -55,17 +54,11 @@ theme:
   icon:
     repo: fontawesome/brands/github-alt
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: teal
-      accent: teal
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to dark theme
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: teal
-      accent: teal
-      toggle:
-        icon: material/weather-night
-        name: Switch to light theme
+    scheme: default
+    primary: white
+    accent: deep purple
+    toggle:
+      icon: material/weather-sunny
+      name: Switch to dark theme
+extra_css:
+  - stylesheets/custom.css
