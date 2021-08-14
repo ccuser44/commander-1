@@ -143,6 +143,10 @@ body {
     top: 0.6rem;
 }
 
+.md-search__options {
+    top: 0.6rem;
+}
+
 .md-search__form {
     height: 2.4rem;
     border-radius: 0
