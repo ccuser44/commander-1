@@ -49,6 +49,13 @@ With the use of the API, you can easily make your package extremely lightweight,
     }
     ```
 
+#### API.getProfile
+!!! abstract "`profile` API.getProfile(`string|integer` user)"
+    **:hourglass-flowing-sand: Asynchronous operation**
+    Returns the profile of the user
+
+    :warning: Release the profile once you are done working with it, for more details, refer to the documentation for [ProfileService](https://madstudioroblox.github.io/ProfileService/)
+
 ### Misc
 #### API.addChecker
 !!! abstract "`nil` API.addChecker(`string` Name, `function` Checker)" 
