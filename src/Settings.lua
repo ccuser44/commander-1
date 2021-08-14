@@ -39,11 +39,9 @@ return {
         },
     },
 
-    DataStores = {
-        BanKey = "commander.bans",
-        ConfigurationKey = "commander.config",
-        LogKey = "commander.log",
-        PrivateMessageKey = "commander.pm"
+    Profiles = {
+        PlayerProfileStoreIndex = "commander.plrProfileStore",
+        LogProfileStoreIndex = "commander.logProfileStore",
     },
 
     Interface = {
