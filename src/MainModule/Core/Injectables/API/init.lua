@@ -5,11 +5,14 @@ API.Extenders = {
     PlayerWrapper = {}
 }
 
+local Players = game:GetService("Players")
 local CollectionService = game:GetService("CollectionService")
 
 local core = script.Parent.Parent
+local profileService = require(core.ProfileService)
 local settings = require(core.Settings)
 local dLog = require(core.dLog)
+local magicTools = require(script.Parent.MagicTools)
 
 local function safePcall(functionToCall, ...)
     local retries = 0
@@ -87,6 +90,17 @@ function API.wrapPlayer(player)
     return wrapper
 end
 
+function API.getProfile(user)
+    assert(table.find({"number", "string"}, typeof(user)), "Invalid argument #1, accepts either number or string, got " .. typeof(user))
+    if typeof(user) == "string" then
+        local success, result = safePcall(Players.GetUserIdFromNameAsync, Players, tostring(user))
+        assert(success, "GetUserIdFromNameAsync failed with error " .. tostring(result))
+        user = result
+    end
+
+    return API.ProfileStore:LoadProfileAsync(user)
+end
+
 function API.addRemoteTask(remoteType, qualifier, handler)
     assert(remoteType == "Function" or remoteType == "Event", "Invalid remote type, expects either Function or Event")
     local task = {}
@@ -118,6 +132,22 @@ function API.extendPlayerWrapper(extender)
 end
 
 function API.initialize(remotes)
+    API.ProfileStore = profileService.GetProfileStore(
+        settings.Profiles.PlayerProfileStoreIndex,
+        {
+            ["Bans"] = {
+                ["IsActive"] = false,
+                ["ActiveUntil"] = 0,
+                ["History"] = {}
+            },
+
+            ["Configuration"] = {
+                ["Language"] = tostring(settings.Interface.DefaultLanguage),
+                ["Theme"] = tostring(settings.Interface.DefaultTheme),
+                ["ThemeColor"] = magicTools.packColor3(settings.Interface.DefaultThemeColor)
+            }
+        }
+    )
     API.Remotes.Function = {}
     API.Remotes.Event = {}
 
