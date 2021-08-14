@@ -131,3 +131,42 @@ html .md-footer-meta.md-typeset a {
     letter-spacing: 0.2em;
     font-weight: 600;
 }
+
+.md-typeset .admonition {
+    border-radius: 0.4rem;
+    border: .05rem solid var(--md-default-fg-color--lightest);
+    box-shadow: none;
+}
+
+/* Syntax Theme: Quiet Light */
+
+.md-typeset code {
+    background-color: #F5F5F5;
+    border: .05rem solid var(--md-default-fg-color--lightest);
+    border-radius: 0.4rem;
+}
+
+:root > * {
+    --md-code-hl-number-color: #9C5D27;
+    --md-code-hl-function-color: #AA3731;
+    --md-code-hl-constant-color: #9C5D27;
+    --md-code-hl-keyword-color: #4B69C6;
+    --md-code-hl-string-color: #448C27;
+    --md-code-hl-name-color: #7A3E9D;
+    --md-code-hl-operator-color: #777777;
+    --md-code-hl-punctuation-color: #777777;
+    --md-code-hl-comment-color: #AAAAAA;
+    --md-code-hl-generic-color: #777777;
+    --md-code-hl-variable-color: #7A3E9D;
+    --md-code-bg-color: #F5F5F5;
+    --md-code-fg-color: #7A3E9D;
+    --md-code-hl-color: #C9D0D9;
+}  
+
+.highlight .cp, .cpf, .c1 {
+    font-style: italic
+}
+
+.highlight .kc {
+    color: #9C5D27;
+}
