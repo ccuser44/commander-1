@@ -58,6 +58,7 @@ body {
     background-color: var(--md-accent-fg-color--transparent)
 }
 
+
 .md-header__title {
     margin-left: 0.6rem;
     font-weight: 400;
@@ -140,6 +141,11 @@ body {
 
 .md-search__form .md-icon {
     top: 0.6rem;
+}
+
+.md-search__form {
+    height: 2.4rem;
+    border-radius: 0
 }
 
 .md-search__output {
