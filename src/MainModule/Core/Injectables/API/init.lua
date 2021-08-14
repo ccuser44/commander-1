@@ -107,7 +107,7 @@ function API.addRemoteTask(remoteType, qualifier, handler)
     task._remoteType = remoteType
     task._handler = handler
     if typeof(qualifier) == "string" then
-        task._qualifier = function(player, requestType)
+        task._qualifier = function(_, requestType)
             return requestType == qualifier
         end
     else
