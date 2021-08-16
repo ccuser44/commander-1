@@ -9,7 +9,7 @@ local packagesFolder, remotesFolder = nil, nil
 local dLog = require(coreFolder.dLog)
 local constants = require(coreFolder.Constants)
 local validify = require(coreFolder.Validify)
-local void = require(coreFolder.Void)
+local void = require(coreFolder.void)
 local settings = nil
 
 local injectables = {}
