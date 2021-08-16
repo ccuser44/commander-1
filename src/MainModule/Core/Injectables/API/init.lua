@@ -91,14 +91,14 @@ function API.wrapPlayer(player)
 end
 
 function API.getProfile(user)
-    assert(table.find({"number", "string"}, typeof(user)), "Invalid argument #1, accepts either number or string, got " .. typeof(user))
-    if typeof(user) == "string" then
-        local success, result = safePcall(Players.GetUserIdFromNameAsync, Players, tostring(user))
-        assert(success, "GetUserIdFromNameAsync failed with error " .. tostring(result))
-        user = result
+    local userProfile = API.ProfileStore:LoadProfileAsync(user)
+    if userProfile then
+        userProfile:Reconcile()
+        return userProfile
     end
 
-    return API.ProfileStore:LoadProfileAsync(user)
+    dLog("Warn", "Something seemed to be not working while trying to load the profile for " .. user)
+    return nil
 end
 
 function API.addRemoteTask(remoteType, qualifier, handler)
@@ -133,20 +133,7 @@ end
 
 function API.initialize(remotes)
     API.ProfileStore = profileService.GetProfileStore(
-        settings.Profiles.PlayerProfileStoreIndex,
-        {
-            ["Bans"] = {
-                ["IsActive"] = false,
-                ["ActiveUntil"] = 0,
-                ["History"] = {}
-            },
-
-            ["Configuration"] = {
-                ["Language"] = tostring(settings.Interface.DefaultLanguage),
-                ["Theme"] = tostring(settings.Interface.DefaultTheme),
-                ["ThemeColor"] = magicTools.packColor3(settings.Interface.DefaultThemeColor)
-            }
-        }
+        settings.Profiles.PlayerProfileStoreIndex
     )
     API.Remotes.Function = {}
     API.Remotes.Event = {}
