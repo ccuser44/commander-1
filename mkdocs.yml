@@ -7,6 +7,7 @@ repo_url: 'https://github.com/evoincorp/commander'
 edit_uri: edit/v2/docs
 plugins:
   - search
+  - git-revision-date-localized
 copyright: Copyright &copy; 2020 - 2021 Evo Incorp
 markdown_extensions:
   - attr_list
