@@ -1,25 +1,50 @@
+-- 7kayoh
+-- Validify.lua
+-- August 25, 2021
+
+-- Singletons
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Private declarations
+local Shared = ReplicatedStorage.Shared
+
+local t = require(Shared.t)
+local strictify = require(Shared.Strictify)
+
+local AcceptedValues = {
+    PkgClass = {"Command", "Stylesheet", "Plugin"},
+    CommandCategory = {"Player", "Server"},
+    PluginCategory = {"Client", "Server"}
+}
+local Types = {
+    ValidatePkg = t.strict(t.interface({
+        Name = t.string,
+        Description = t.string,
+        Class = t.string,
+        Author = t.string,
+        Category = t.optional(t.string),
+        Target = t.optional(t.union(t.table, t.function))
+    }))
+}
+
 local Validify = {}
 
-local acceptedPkgClass = {"Command", "Stylesheet", "Plugin"}
-local acceptedCommandCategory = {"Player", "Server"}
-local acceptedPluginCategory = {"Client", "Server"}
-
-function Validify.validatePkg(pkgTable)
-    if typeof(pkgTable) == "table" then
-        if pkgTable.Name and pkgTable.Description and pkgTable.Class and pkgTable.Author then
-            if table.find(acceptedPkgClass, pkgTable.Class) then
-                if pkgTable.Class == "Command" and table.find(acceptedCommandCategory, pkgTable.Category) then
-                    return true
-                elseif pkgTable.Class == "Plugin" and table.find(acceptedPluginCategory, pkgTable.Category) then
-                    return true
-                elseif pkgTable.Class ~= "Command" then
-                    return true
-                end
+function Validify.ValidatePkg(pkgTable)
+    Types.ValidatePkg(pkgTable)
+    
+    if table.find(AcceptedValues.PkgClass, pkgTable.Class) then
+        if table.find(AcceptedValues, pkgTable.Class .. "Category" then
+            if Target ~= nil then
+                return true
             end
+            
+            return false
         end
+        
+        return true
     end
-
+    
     return false
 end
 
-return Validify
+return strictify(Validify)
