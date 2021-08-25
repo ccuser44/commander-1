@@ -1,197 +1,193 @@
+-- 7kayoh
+-- MainModule
+-- August 24, 2020
+
+-- Singletons
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
-local assetsFolder = script.Assets
-local coreFolder = script.Core
-local injectablesFolder = coreFolder.Injectables
-local packagesFolder, remotesFolder = nil, nil
+-- Private declarations
+local Assets = script.Assets
+local Core = script.Core
+local Shared = script.Assets.Shared:Clone()
+Shared.Parent = ReplicatedStorage
+local Packages, Remotes = nil, nil
 
-local dLog = require(coreFolder.dLog)
-local constants = require(coreFolder.Constants)
-local validify = require(coreFolder.Validify)
-local void = require(coreFolder.void)
-local settings = nil
+local Constants = require(Core.Constants)
+local dLog = require(Core.dLog)
+local Validify = require(Core.Validify)
+local void = require(Core.Void)
+local t = require(Shared.t)
+local Settings = nil
 
-local injectables = {}
-local loadedPkg = {
-    ["Command"] = {
-        ["Server"] = {},
-        ["Player"] = {}
+local Injectables = {}
+local Invokers = {}
+local LoadedPkg = {
+    Command = {
+        Server = {},
+        Player = {}
     },
-    ["Stylesheet"] = {},
-    ["Plugin"] = {
-        ["Server"] = {},
-        ["Client"] = {}
+    Stylesheet = {},
+    Plugin = {
+        Server = {},
+        Client = {}
     }
 }
 
+local Types = {
+    assert = t.strict(boolean),
+    CopyTable = t.strict(t.table),
+    CommandInvoker = t.strict(t.Player, t.string),
+    InitPkg = t.strict(t.ModuleScript),
+    LoadPkg = t.strict(t.ModuleScript),
+    InitPlugin = t.strict(t.table),
+    Return = t.strict(t.ModuleScript, t.Folder)
+}
+
+-- Functions
 local function assert(condition, ...)
+    Types.assert(condition)
     if not condition then
         dLog("Error", ...)
     end
 end
 
-function copyTable(table)
-    if typeof(table) ~= "table" then
-        return table
-    end
-
-    local result = setmetatable({}, getmetatable(table))
-    for index, value in pairs(table) do
-        result[copyTable(index)] = copyTable(value)
-    end
-
-    return result
+local function CopyTable(table)
+    Types.CopyTable(table)
+	local Copy = {}
+	for Key, Value in next, table do
+		if type(value) == "table" then
+			Copy[key] = CopyTable(Value)
+		else
+			Copy[key] = Value
+		end
+	end
+	
+	return Copy
 end
 
-local function onCommandInvoke(player, requestType, ...)
-    local arguments = {...}
-    local commandName = table.remove(arguments, 1)
-    local category = table.remove(arguments, 2)
-    local commandIndex = table.find(loadedPkg.Command[category], commandName)
+function Invokers.OnCommand(player, requestType, ...)
+    Types.CommandInvoker(player, requestType)
+    assert(table.find({"Server", "Player"}, Category), Category .. " is not a valid member of CommandCategory")
 
-    assert(table.find({"Server", "Player"}, category),
-    "Expects Server/Player, got " .. category)
-
-    if commandIndex then
-        local userGroup = settings.Groups[player.AdminIndex]
-        if table.find(userGroup.Commands, commandName) or
-        table.find(userGroup.Commands, "*") then
-            local pkg = loadedPkg.Commands[category][commandIndex]
-            return pkg.Target(player, requestType, arguments)
-        end
-    end
-
-    return false
-end
-
-local function initPkg(pkg)
-    if pkg:IsA("ModuleScript") then
-        local requiredPkg = require(pkg)
-
-        if validify.validatePkg(requiredPkg) then
-            dLog("Success", pkg.Name .. " is a valid package")
-
-            if requiredPkg.Class == "Command" then
-                pkg.Parent = packagesFolder.Command[requiredPkg.Category]
-            elseif requiredPkg.Class == "Plugin" then
-                pkg.Parent = packagesFolder.Plugin[requiredPkg.Category]
-            else
-                pkg.Parent = packagesFolder[requiredPkg.Class]
-            end
-            dLog("Success", "Initialized package " .. pkg.Name)
-        else
-            dLog("Warn", pkg.Name .. " is not a valid package")
-        end
-    end
-end
-
-local function loadPkg(pkg)
-    if pkg:IsA("ModuleScript") then
-        pkg = require(pkg)
-        local pkgInfo = {
-            ["Name"] = pkg.Name,
-            ["Description"] = pkg.Description,
-            ["Author"] = pkg.Author,
-            ["Class"] = pkg.Class,
-            ["Category"] = pkg.Category or void,
-            ["Target"] = pkg.Target
-        }
-
-        pkg.Settings = copyTable(settings)
-        pkg.Core = coreFolder
-        pkg.Util = injectables
-        pkg.API = pkg.Util.API
-
-        if pkg.Class == "Command" then
-            pkg.Plugins = loadedPkg.Plugin
-            loadedPkg.Command[pkg.Category][pkg.Name] = pkgInfo
-        else
-            loadedPkg[pkg.Class][pkg.Name] = pkgInfo
-        end
-
-        dLog("Success", "Loaded package " .. pkg.Name)
-    end
-end
-
-local function initPlugin(pkg)
-    if typeof(pkg.Target) == "table" and pkg.Category == "Server" and pkg.Target.Init then
-        dLog("Wait", "Initialize plugin " .. pkg.Name)
-        pkg.Target:Init()
-        dLog("Success", "Initialized plugin " .. pkg.Name)
-    end
-end
-
-return function(userSettings, userPkg)
-    assert(userSettings, "Expect user configuration, got nil")
-    assert(userPkg, "Expect user packages, got nil")
-    dLog("Info", "Welcome to V2")
-
-    remotesFolder = Instance.new("Folder", ReplicatedStorage)
-    remotesFolder.Name = "Commander"
-    Instance.new("RemoteEvent", remotesFolder)
-    Instance.new("RemoteFunction", remotesFolder)
-    dLog("Success", "Created remotes")
-
-    packagesFolder = Instance.new("Folder", script)
-    packagesFolder.Name = "Packages"
-    Instance.new("Folder", packagesFolder).Name = "Command"
-    Instance.new("Folder", packagesFolder.Command).Name = "Server"
-    Instance.new("Folder", packagesFolder.Command).Name = "Player"
-    Instance.new("Folder", packagesFolder).Name = "Stylesheet"
-    Instance.new("Folder", packagesFolder).Name = "Plugin"
-    dLog("Success", "Created packages folder and its descendants")
-
-    userSettings.Name = "Settings"
-    userSettings.Parent = coreFolder
-    settings = userSettings
-    dLog("Success", "Injected user configuration")
-
-    dLog("Wait", "Load injectables")
-    for _, component in ipairs(injectablesFolder:GetChildren()) do
-        if component:IsA("ModuleScript") then
-            injectables[component.Name] = require(component)
-            dLog("Success", "Loaded " .. component.Name)
-        end
-    end
-    dLog("Success", "Loaded all injectables")
-
-    dLog("Wait", "Load user packages")
-    if #userPkg:GetDescendants() == 0 then
-        dLog("Info", "No user packages found")
-    end
-    for _, pkg in ipairs(userPkg:GetDescendants()) do
-        initPkg(pkg)
-    end
-    dLog("Success", "Loaded user packages")
-    for _, pkg in ipairs(packagesFolder:GetDescendants()) do
-        loadPkg(pkg)
-    end
-    dLog("Success", "Initialized user packages")
-
-    dLog("Wait", "Initialize plugins")
-    for _, pkg in pairs(loadedPkg.Plugin) do
-        initPlugin(pkg)
-    end
-    dLog("Success", "Initialized plugins")
-
-    dLog("Wait", "Initialize API")
-    injectables.API.initialize(remotesFolder)
-    dLog("Success", "Initialized API")
+    local Arguments = {...}
+    local Name = table.remove(Arguments, 1)
+    local Category = table.remove(Arguments, 2)
+    local ErrorMessage = "No error message defined"
+    local Index = table.find(LoadedPkg.Command[Category], commandName)
     
-    dLog("Wait", "Connect remotes")
-    injectables.API.addRemoteTask("Function", "onCommand", onCommandInvoke)
-    dLog("Success", "Added an onCommandInvoke task for RemoteFunction")
-    dLog("Success", "Connected remotes")
-
-    dLog("Wait", "Connect player events and initialize existing players")
-    Players.PlayerAdded:Connect(function(player)
-        injectables.API.initializePlayer(player)
-    end)
-    dLog("Success", "Connected player events")
-    for _, player in ipairs(Players:GetPlayers()) do
-        injectables.API.initializePlayer(player)
+    if Index then
+        local UserGroup = Settings.Groups[player.AdminIndex]
+        if table.find(UserGroup.Commands, Name) or table.find(UserGroup.Commands, "*" then
+            local Pkg = LoadedPkg.Commands[Category][CommandIndex]
+            return Pkg.Target(player, requestType, Arguments)
+        else
+            ErrorMessage = "Insufficient permission"
+        end
+    else
+        ErrorMessage = "Command does not exist"
     end
-    dLog("Success", "Initialized existing players")
-    dLog("Success", "Complete setup")
+    
+    return false, ErrorMessage
+end
+
+local function InitPkg(pkg)
+    Types.InitPkg(pkg)
+    
+    local RequiredPkg = require(pkg)
+    if Validify.ValidatePkg(requiredPkg) then
+        if table.find({"Command", "Plugin"}, RequiredPkg.Class) then
+            Pkg.Parent = Packages[RequiredPkg.Class][RequiredPkg.Class]
+        else
+            Pkg.Parent = Packages[RequiredPkg.Class]
+        end
+    end
+end
+
+local function LoadPkg(pkg)
+    Types.InitPkg(pkg)
+    
+    local RequiredPkg = require(pkg)
+    local PkgInfo = {}
+    
+    for Name, Value in next, RequiredPkg do
+        PkgInfo[Name] = Value or void
+    end
+    
+    RequiredPkg.Settings = CopyTable(Settings)
+    RequiredPkg.Core = Core
+    RequiredPkg.Util = Injectables
+    RequiredPkg.API = Pkg.Util.API
+    RequiredPkg.Shared = Shared
+    RequiredPkg.Plugins = PkgInfo.Class == "Command" and LoadedPkg.Plugin or nil
+    
+    if table.find({"Command", "Plugin"}, PkgInfo.Class) then
+        LoadedPkg[PkgInfo.Class][PkgInfo.Category][PkgInfo.Name] = PkgInfo
+    else
+        LoadedPkg[PkgInfo.Class][PkgInfo.Name] = PkgInfo
+    end
+end
+
+local function InitPlugin(pkg)
+    Types.InitPlugin(pkg)
+    
+    if pkg.Category == "Server" and pkg.Target.Init then
+        pkg.Target:Init()
+    end
+end
+
+-- Returns
+return function(userSettings, userPkgs)
+    Types.Return(userSettings, userPkgs)
+    dLog("Info", "Welcome to V2")
+    
+    Remotes = Instance.new("Folder", ReplicatedStorage)
+    Remotes.name = "Remotes"
+    Instance.new("RemoteEvent", Remotes)
+    Instance.new("RemoteFunction", Remotes)
+    
+    Packages = Instance.new("Folder", script)
+    Packages.Name = "Packages"
+    
+    Instance.new("Folder", Packages).Name = "Command"
+    Instance.new("Folder", Packages.Command).Name = "Server"
+    Instance.new("Folder", Packages.Command).Name = "Player"
+    Instance.new("Folder", Packages).Name = "Stylesheet"
+    Instance.new("Folder", Packages).Name = "Plugin"
+    
+    userSettings.name = "Settings"
+    userSettings.Parent = Core
+    Settings = userSettings
+    
+    for _, Component in next, Core.Injectables:GetChildren() do
+        if Component:IsA("ModuleScript") then
+            Injectables[Component.Name] = require(component)
+        end
+    end
+    
+    for _, Pkg in next, userPkgs:GetDescendants() do
+        InitPkg(Pkg)
+    end
+    for _, Pkg in next, Packages:GetDescendants() do
+        LoadPkg(Pkg)
+    end
+    for _, Plugin in next, LoadedPkg.Plugin do
+        InitPlugin(Plugin)
+    end
+    
+    Injectables.API.Initialize(Remotes)
+    
+    for Name, Invoker in next, Invokers do
+        Injectables.API.AddRemoteTask("Function", Name, Invoker)
+    end
+    
+    Players.PlayerAdded:Connect(function(player)
+        Injectables.API.InitializePlayer(player)
+    end
+    for _, Player in next, Players:GetPlayers() do
+        Injectables.API.InitializePlayer(Player)
+    end
+    
+    dLog("Success", "Loaded")
+    return true
 end
