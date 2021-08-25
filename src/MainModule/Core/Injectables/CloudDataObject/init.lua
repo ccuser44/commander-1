@@ -10,9 +10,9 @@ local onNewMessage = Instance.new("BindableEvent")
 local tick = os.time
 
 -- Private functions
-local function deepCopyTable(t)
+local function deepCopyTable(table: {any})
 	local copy = {}
-	for key, value in pairs(t) do
+	for key, value in pairs(table) do
 		if type(value) == "table" then
 			copy[key] = deepCopyTable(value)
 		else
@@ -22,9 +22,9 @@ local function deepCopyTable(t)
 	return copy
 end
 
-local function reconcileTable(target, template)
+local function reconcileTable(target: {any}, template: {any})
     for k, v in pairs(template) do
-        if type(k) == "string" then -- Only string keys will be reconciled
+        if type(k) == "string" then
             if target[k] == nil then
                 if type(v) == "table" then
                     target[k] = deepCopyTable(v)
@@ -38,20 +38,20 @@ local function reconcileTable(target, template)
     end
 end
 
-local function safePcall(retryForever, functionToCall, ...)
+local function safePcall(retryForever: boolean, functionToCall: () -> any, ...: any)
     local retries = 0
     local response = {pcall(functionToCall, ...)}
     
     while not response[1] and retries < (retryForever and math.huge or 3) do
         response = {pcall(functionToCall, ...)}
         retries += 1
-        wait(5)
+        task.wait(5)
     end
 
     return table.remove(response, 1), unpack(response)
 end
 
-local function waitForResponse(validifyFunction)
+local function waitForResponse(validifyFunction: ({any}) -> boolean): {any}
     local data = {}
 
     while validifyFunction(data) ~= true do
@@ -64,7 +64,7 @@ end
 -- Components
 local instance = {}
 
-function instance:AddQueue(queueFunction)
+function instance:AddQueue(queueFunction: () -> any)
     if self._QueueLocked then return end
     table.insert(self._Queue, queueFunction)
 end
@@ -88,15 +88,17 @@ function instance:GetData()
                                                self.Parent,
                                                self.Name
                                               )
-            self._Data = data
+            self._Data = data or {}
             self._Meta = keyInfo:GetMetadata()
             self.KeyInfo = keyInfo
             self.UserId = keyInfo:GetUserIds()
+
+            self:Reconcile()
         end
     end)
 end
 
-function instance:Reconcile()
+function instance:Reconcile(): {any}
     assert(self._Template, "Reconcile was called, but there is no template available to be reconciled")
     self:_AddToQueue(function()
         reconcileTable(self._Data, self._Template)
@@ -143,7 +145,7 @@ function instance:SaveAsync()
     end)
 end
 
-function instance:SetWaypoint(waypointName)
+function instance:SetWaypoint(waypointName: string)
     self._addToQueue(function()
         table.insert(self._Meta.Waypoints, {
             ["Name"] = waypointName,
@@ -152,7 +154,7 @@ function instance:SetWaypoint(waypointName)
     end)
 end
 
-function instance:_LockQueue(toggle: Boolean)
+function instance:_LockQueue(toggle: boolean)
     self._QueueLocked = toggle
 end
 
@@ -164,7 +166,7 @@ function instance:_StartQueueDaemon()
 end
 
 -- Something else
-MessagingService:SubscribeAsync("CloudDataObject", function(data, sent)
+MessagingService:SubscribeAsync("CloudDataObject", function(data: {any}, sent: number)
     if activeInstances[data[2]] and activeInstances[data[2]][3] then
         safePcall(true,
                   MessagingService.PublishAsync,
@@ -182,7 +184,7 @@ end)
 
 -- Exports
 return strict {
-    ["new"] = function(globalDataStore, key, template)
+    ["new"] = function(globalDataStore: GlobalDataStore, key: string, template: {[any]: any})
         local data = waitForResponse(function(data)
             return data[1] == "IsInstanceBusy" and data[2] == globalDataStore.Name and data[3] == key and data[4] == false
         end)
