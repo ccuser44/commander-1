@@ -1,20 +1,36 @@
-local API = {}
-API.Remotes = {}
-API.Checkers = {}
-API.Extenders = {
-    PlayerWrapper = {}
+-- 7kayoh
+-- API.lua
+-- August 25, 2021
+
+-- Singletons
+local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+-- Private declarations
+local Core = script.Parent.Parent
+local Shared = ReplicatedStorage.Shared
+
+local MagicTools = require(script.Parent.MagicTools)
+local dLog = require(Core.dLog)
+local Settings = require(Core.Settings)
+local t = require(Shared.t)
+local strictify = require(Shared.Strictify)
+
+local Types = {
+    GetAdminStatusWithUserId = t.strict(t.integer),
+    GetAdminLevel = t.strict(t.Player),
+    CheckUserAdmin = t.strict(t.Player),
+    InitializePlayer = t.strict(t.Player),
+    WrapPlayer = t.strict(t.Player),
+    AddRemoteTask = t.strict(t.string, t.union(t.string, t.function), t.function),
+    AddChecker = t.strict(t.string, t.function),
+    ExtendPlayerWrapper = t.strict(t.function),
+    Initialize = t.strict(t.Folder)
 }
 
-local Players = game:GetService("Players")
-local CollectionService = game:GetService("CollectionService")
-
-local core = script.Parent.Parent
-local profileService = require(core.ProfileService)
-local settings = require(core.Settings)
-local dLog = require(core.dLog)
-local magicTools = require(script.Parent.MagicTools)
-
-local function safePcall(functionToCall, ...)
+-- Functions
+local function SafePcall(functionToCall, ...)
     local retries = 0
     local success, result = pcall(functionToCall, ...)
     
@@ -27,52 +43,62 @@ local function safePcall(functionToCall, ...)
     return success, result
 end
 
-function API.getAdminStatusWithUserId(userId)
-    local currentIndex
-    dLog("Info", "Received request of " .. userId)
-    for name, checker in pairs(API.Checkers) do
-        dLog("Info", "At checker " .. name)
-        local index = checker(userId)
-        dLog("Info", "Got group index of " .. index)
-        if index and (currentIndex or 0) < index then
-            currentIndex = index
+-- Return table
+local API = {
+    Remotes = {},
+    Checkers = {},
+    Extenders = {
+        PlayerWrapper = {}
+    }
+}
+
+function API.GetAdminStatusWithUserId(userId)
+    Types.GetAdminStatusWithUserId(userId)
+    local CurrentIndex = nil
+    for Name, Checker in next, API.Checkers do
+        local Index = Checker(userId)
+        if Index and (CurrentIndex or 0) < Index then
+            CurrentIndex = Index
         else
             continue
         end
-
-        if index == #settings.Groups then
+        
+        if Index == #Settings.Groups then
             break
         end
     end
-
-    if currentIndex then
-        return currentIndex, settings.Groups[currentIndex].Name
+    
+    if CurrentIndex then
+        return CurrentIndex, Settings.Groups[CurrentIndex].Name
     end
 end
 
-function API.getAdminLevel(player)
+function API.GetAdminLevel(player)
+    Types.GetAdminLevel(player)
     return player:GetAttribute("Commander_AdminIndex"), player:GetAttribute("Commander_AdminGroup")
 end
 
-function API.checkUserAdmin(player)
+function API.CheckUserAdmin(player)
+    Types.CheckUserAdmin(player)
     return CollectionService:HasTag(player, "Commander_Admin")
 end
 
-function API.initializePlayer(player)
+function API.InitializePlayer(player)
+    Types.InitializePlayer(player)
     if CollectionService:HasTag(player, "Commander_Loaded") then return end
-    local groupIndex, groupName = API.getAdminStatusWithUserId(player.UserId)
+    local GroupIndex, GroupName = API.GetAdminStatusWithUserId(player.UserId)
 
     if groupIndex then
-        dLog("Info", player.UserId .. " is an administrator with permission " .. groupIndex)
-        player:SetAttribute("Commander_AdminIndex", groupIndex)
-        player:SetAttribute("Commander_AdminGroup", groupName)
+        player:SetAttribute("Commander_AdminIndex", GroupIndex)
+        player:SetAttribute("Commander_AdminGroup", GroupName)
         CollectionService:AddTag(player, "Commander_Admin")
         CollectionService:AddTag(player, "Commander_Loaded")
     end
 end
 
-function API.wrapPlayer(player)
-    local wrapper = {
+function API.WrapPlayer(player)
+    Types.WrapPlayer(player)
+    local Wrapper = {
         ["Name"] = player.Name,
         ["DisplayName"] = player.DisplayName,
         ["UserId"] = player.UserId,
@@ -81,13 +107,13 @@ function API.wrapPlayer(player)
         ["_instance"] = player
     }
 
-    wrapper.AdminIndex, wrapper.AdminGroup = API.getAdminLevel(player)
+    Wrapper.AdminIndex, Wrapper.AdminGroup = API.getAdminLevel(player)
 
-    for _, extender in ipairs(API.Extenders.PlayerWrapper) do
-        extender(player, wrapper)
+    for _, Extender in next, API.Extenders.PlayerWrapper do
+        Extender(player, Wrapper)
     end
 
-    return wrapper
+    return Wrapper
 end
 
 function API.getProfile(user)
@@ -101,37 +127,41 @@ function API.getProfile(user)
     return nil
 end
 
-function API.addRemoteTask(remoteType, qualifier, handler)
+function API.AddRemoteTask(remoteType, qualifier, handler)
+    Types.AddRemoteTask(remoteType, qualifier, handler)
     assert(remoteType == "Function" or remoteType == "Event", "Invalid remote type, expects either Function or Event")
-    local task = {}
-    task._remoteType = remoteType
-    task._handler = handler
+    local Task = {}
+    Task._remoteType = remoteType
+    Task._handler = handler
+    
     if typeof(qualifier) == "string" then
-        task._qualifier = function(_, requestType)
+        Task._qualifier = function(_, requestType)
             return requestType == qualifier
         end
     else
-        task._qualifier = qualifier
+        Task._qualifier = qualifier
     end
 
-    function task.leave()
+    function Task.leave()
         table.remove(API.Remotes[remoteType], table.find(API.Remotes[remoteType], handler))
     end
 
-    table.insert(API.Remotes[remoteType], task)
-    return task
+    table.insert(API.Remotes[remoteType], Task)
+    return Task
 end
 
-function API.addChecker(name, checkerFunction)
-    dLog("Success", "Added checker " .. name .. ", got " .. #API.Checkers .. " checkers so far")
+function API.AddChecker(name, checkerFunction)
+    Types.AddChecker(name, checkerFunction)
     API.Checkers[name] = checkerFunction
 end
 
 function API.extendPlayerWrapper(extender)
+    Types.ExtendPlayerWrapper(extender)
     table.insert(API.Extenders.PlayerWrapper, extender)
 end
 
 function API.initialize(remotes)
+    Types.Initialize(remotes)
     API.ProfileStore = profileService.GetProfileStore(
         settings.Profiles.PlayerProfileStoreIndex
     )
@@ -139,19 +169,19 @@ function API.initialize(remotes)
     API.Remotes.Event = {}
 
     remotes.RemoteFunction.OnServerInvoke = function(player, requestType, ...)
-        player = API.wrapPlayer(player)
-        for _, task in ipairs(API.Remotes.Function) do
-            if task.qualifier(player, requestType) then
-                return task._handler(player, requestType, ...)
+        player = API.WrapPlayer(player)
+        for _, Task in next, API.Remotes.Function do
+            if Task.qualifier(player, requestType) then
+                return Task._handler(player, requestType, ...)
             end
         end
     end
 
     remotes.RemoteEvent.OnServerEvent:Connect(function(player, requestType, ...)
-        player = API.wrapPlayer(player)
-        for _, task in ipairs(API.Remotes.Event) do
-            if task.qualifier(player, requestType) then
-                return task._handler(player, requestType, ...)
+        player = API.WrapPlayer(player)
+        for _, Task in next, API.Remotes.Event do
+            if Task.qualifier(player, requestType) then
+                return Task._handler(player, requestType, ...)
             end
         end
     end)
