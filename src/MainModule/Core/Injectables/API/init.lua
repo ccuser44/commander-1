@@ -23,9 +23,9 @@ local Types = {
     CheckUserAdmin = t.strict(t.Player),
     InitializePlayer = t.strict(t.Player),
     WrapPlayer = t.strict(t.Player),
-    AddRemoteTask = t.strict(t.string, t.union(t.string, t.function), t.function),
-    AddChecker = t.strict(t.string, t.function),
-    ExtendPlayerWrapper = t.strict(t.function),
+    AddRemoteTask = t.strict(t.string, t.union(t.string, t.callback), t.callback),
+    AddChecker = t.strict(t.string, t.callback),
+    ExtendPlayerWrapper = t.strict(t.callback),
     Initialize = t.strict(t.Folder)
 }
 
