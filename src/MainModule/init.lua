@@ -166,10 +166,14 @@ return function(userSettings, userPkgs)
     end
     
     for _, Pkg in next, userPkgs:GetDescendants() do
-        InitPkg(Pkg)
+        if Pkg:IsA("ModuleScript") then
+            InitPkg(Pkg)
+        end
     end
     for _, Pkg in next, Packages:GetDescendants() do
-        LoadPkg(Pkg)
+        if Pkg:IsA("ModuleScript") then
+            LoadPkg(Pkg)
+        end
     end
     for _, Plugin in next, LoadedPkg.Plugin do
         InitPlugin(Plugin)
