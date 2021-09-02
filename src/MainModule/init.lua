@@ -57,9 +57,9 @@ local function CopyTable(table)
 	local Copy = {}
 	for Key, Value in next, table do
 		if type(value) == "table" then
-			Copy[key] = CopyTable(Value)
+			Copy[Key] = CopyTable(Value)
 		else
-			Copy[key] = Value
+			Copy[Key] = Value
 		end
 	end
 	
