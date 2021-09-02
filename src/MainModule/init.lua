@@ -155,13 +155,13 @@ return function(userSettings, userPkgs)
     Instance.new("Folder", Packages).Name = "Stylesheet"
     Instance.new("Folder", Packages).Name = "Plugin"
     
-    userSettings.name = "Settings"
+    userSettings.Name = "Settings"
     userSettings.Parent = Core
     Settings = userSettings
     
     for _, Component in next, Core.Injectables:GetChildren() do
         if Component:IsA("ModuleScript") then
-            Injectables[Component.Name] = require(component)
+            Injectables[Component.Name] = require(Component)
         end
     end
     
