@@ -78,7 +78,7 @@ function Invokers.OnCommand(player, requestType, ...)
     
     if Index then
         local UserGroup = Settings.Groups[player.AdminIndex]
-        if table.find(UserGroup.Commands, Name) or table.find(UserGroup.Commands, "*" then
+        if table.find(UserGroup.Commands, Name) or table.find(UserGroup.Commands, "*") then
             local Pkg = LoadedPkg.Commands[Category][CommandIndex]
             return Pkg.Target(player, requestType, Arguments)
         else
@@ -183,7 +183,7 @@ return function(userSettings, userPkgs)
     
     Players.PlayerAdded:Connect(function(player)
         Injectables.API.InitializePlayer(player)
-    end
+    end)
     for _, Player in next, Players:GetPlayers() do
         Injectables.API.InitializePlayer(Player)
     end
