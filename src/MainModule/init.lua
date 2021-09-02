@@ -154,6 +154,8 @@ return function(userSettings, userPkgs)
     Instance.new("Folder", Packages.Command).Name = "Player"
     Instance.new("Folder", Packages).Name = "Stylesheet"
     Instance.new("Folder", Packages).Name = "Plugin"
+    Instance.new("Folder", Packages.Plugin).Name = "Server"
+    Instance.new("Folder", Packages.Plugin).Name = "Player"
     
     userSettings.Name = "Settings"
     userSettings.Parent = Core
