@@ -37,11 +37,11 @@ local LoadedPkg = {
 local Types = {
     assert = t.strict(boolean),
     CopyTable = t.strict(t.table),
-    CommandInvoker = t.strict(t.Player, t.string),
-    InitPkg = t.strict(t.ModuleScript),
-    LoadPkg = t.strict(t.ModuleScript),
+    CommandInvoker = t.strict(t.instanceIsA("Player"), t.string),
+    InitPkg = t.strict(t.instanceIsA("ModuleScript")),
+    LoadPkg = t.strict(t.instanceIsA("ModuleScript")),
     InitPlugin = t.strict(t.table),
-    Return = t.strict(t.ModuleScript, t.Folder)
+    Return = t.strict(t.instanceIsA("ModuleScript"), t.instanceIsA("Folder"))
 }
 
 -- Functions
