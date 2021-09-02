@@ -142,7 +142,7 @@ return function(userSettings, userPkgs)
     dLog("Info", "Welcome to V2")
     
     Remotes = Instance.new("Folder", ReplicatedStorage)
-    Remotes.name = "Remotes"
+    Remotes.Name = "Remotes"
     Instance.new("RemoteEvent", Remotes)
     Instance.new("RemoteFunction", Remotes)
     
