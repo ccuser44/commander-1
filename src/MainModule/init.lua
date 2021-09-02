@@ -95,7 +95,7 @@ local function InitPkg(pkg)
     Types.InitPkg(pkg)
     
     local RequiredPkg = require(pkg)
-    if Validify.ValidatePkg(requiredPkg) then
+    if Validify.ValidatePkg(RequiredPkg) then
         if table.find({"Command", "Plugin"}, RequiredPkg.Class) then
             Pkg.Parent = Packages[RequiredPkg.Class][RequiredPkg.Class]
         else
