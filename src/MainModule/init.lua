@@ -159,7 +159,7 @@ return function(userSettings, userPkgs)
     
     userSettings.Name = "Settings"
     userSettings.Parent = Core
-    Settings = userSettings
+    Settings = require(userSettings)
     
     for _, Component in next, Core.Injectables:GetChildren() do
         if Component:IsA("ModuleScript") then
