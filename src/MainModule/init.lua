@@ -117,7 +117,7 @@ local function LoadPkg(pkg)
     RequiredPkg.Settings = CopyTable(Settings)
     RequiredPkg.Core = Core
     RequiredPkg.Util = Injectables
-    RequiredPkg.API = Pkg.Util.API
+    RequiredPkg.API = RequiredPkg.Util.API
     RequiredPkg.Shared = Shared
     RequiredPkg.Plugins = PkgInfo.Class == "Command" and LoadedPkg.Plugin or nil
     

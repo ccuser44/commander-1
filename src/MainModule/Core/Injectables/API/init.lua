@@ -16,17 +16,18 @@ local dLog = require(Core.dLog)
 local Settings = require(Core.Settings)
 local t = require(Shared.t)
 local strictify = require(Shared.Strictify)
+local profileService = require(Core.ProfileService)
 
 local Types = {
     GetAdminStatusWithUserId = t.strict(t.integer),
-    GetAdminLevel = t.strict(t.Player),
-    CheckUserAdmin = t.strict(t.Player),
-    InitializePlayer = t.strict(t.Player),
-    WrapPlayer = t.strict(t.Player),
+    GetAdminLevel = t.strict(t.instanceIsA("Player")),
+    CheckUserAdmin = t.strict(t.instanceIsA("Player")),
+    InitializePlayer = t.strict(t.instanceIsA("Player")),
+    WrapPlayer = t.strict(t.instanceIsA("Player")),
     AddRemoteTask = t.strict(t.string, t.union(t.string, t.callback), t.callback),
     AddChecker = t.strict(t.string, t.callback),
     ExtendPlayerWrapper = t.strict(t.callback),
-    Initialize = t.strict(t.Folder)
+    Initialize = t.strict(t.instanceIsA("Folder"))
 }
 
 -- Functions
@@ -163,7 +164,7 @@ end
 function API.initialize(remotes)
     Types.Initialize(remotes)
     API.ProfileStore = profileService.GetProfileStore(
-        settings.Profiles.PlayerProfileStoreIndex
+        Settings.Profiles.PlayerProfileStoreIndex
     )
     API.Remotes.Function = {}
     API.Remotes.Event = {}
