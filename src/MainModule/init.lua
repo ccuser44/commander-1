@@ -181,7 +181,7 @@ return function(userSettings, userPkgs)
         InitPlugin(Plugin)
     end
     
-    Injectables.API.Initialize(Remotes)
+    Injectables.API.initialize(Remotes)
     
     for Name, Invoker in next, Invokers do
         Injectables.API.AddRemoteTask("Function", Name, Invoker)

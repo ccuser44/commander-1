@@ -164,7 +164,8 @@ end
 function API.initialize(remotes)
     Types.Initialize(remotes)
     API.ProfileStore = profileService.GetProfileStore(
-        Settings.Profiles.PlayerProfileStoreIndex
+        Settings.Profiles.PlayerProfileStoreIndex,
+        {}
     )
     API.Remotes.Function = {}
     API.Remotes.Event = {}
