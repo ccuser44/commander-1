@@ -23,7 +23,7 @@ local Types = {
         Class = t.string,
         Author = t.string,
         Category = t.optional(t.string),
-        Target = t.optional(t.union(t.table, t.function))
+        Target = t.optional(t.union(t.table, t.callback))
     }))
 }
 
@@ -33,7 +33,7 @@ function Validify.ValidatePkg(pkgTable)
     Types.ValidatePkg(pkgTable)
     
     if table.find(AcceptedValues.PkgClass, pkgTable.Class) then
-        if table.find(AcceptedValues, pkgTable.Class .. "Category" then
+        if table.find(AcceptedValues, pkgTable.Class .. "Category") then
             if Target ~= nil then
                 return true
             end

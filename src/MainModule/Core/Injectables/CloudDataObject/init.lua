@@ -4,7 +4,7 @@ local MessagingService = game:GetService("MessagingService")
 
 local settings = require(script.Parent.Parent.Settings)
 local strict = require(script.Parent.Parent.strict)
-local void = require(script.Parent.Parent.void)
+local void = require(script.Parent.Parent.Void)
 local activeInstances = {}
 local onNewMessage = Instance.new("BindableEvent")
 local tick = os.time

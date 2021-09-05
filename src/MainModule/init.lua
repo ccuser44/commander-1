@@ -37,11 +37,11 @@ local LoadedPkg = {
 local Types = {
     assert = t.strict(boolean),
     CopyTable = t.strict(t.table),
-    CommandInvoker = t.strict(t.Player, t.string),
-    InitPkg = t.strict(t.ModuleScript),
-    LoadPkg = t.strict(t.ModuleScript),
+    CommandInvoker = t.strict(t.instanceIsA("Player"), t.string),
+    InitPkg = t.strict(t.instanceIsA("ModuleScript")),
+    LoadPkg = t.strict(t.instanceIsA("ModuleScript")),
     InitPlugin = t.strict(t.table),
-    Return = t.strict(t.ModuleScript, t.Folder)
+    Return = t.strict(t.instanceIsA("ModuleScript"), t.instanceIsA("Folder"))
 }
 
 -- Functions
@@ -57,9 +57,9 @@ local function CopyTable(table)
 	local Copy = {}
 	for Key, Value in next, table do
 		if type(value) == "table" then
-			Copy[key] = CopyTable(Value)
+			Copy[Key] = CopyTable(Value)
 		else
-			Copy[key] = Value
+			Copy[Key] = Value
 		end
 	end
 	
@@ -78,7 +78,7 @@ function Invokers.OnCommand(player, requestType, ...)
     
     if Index then
         local UserGroup = Settings.Groups[player.AdminIndex]
-        if table.find(UserGroup.Commands, Name) or table.find(UserGroup.Commands, "*" then
+        if table.find(UserGroup.Commands, Name) or table.find(UserGroup.Commands, "*") then
             local Pkg = LoadedPkg.Commands[Category][CommandIndex]
             return Pkg.Target(player, requestType, Arguments)
         else
@@ -95,11 +95,11 @@ local function InitPkg(pkg)
     Types.InitPkg(pkg)
     
     local RequiredPkg = require(pkg)
-    if Validify.ValidatePkg(requiredPkg) then
+    if Validify.ValidatePkg(RequiredPkg) then
         if table.find({"Command", "Plugin"}, RequiredPkg.Class) then
-            Pkg.Parent = Packages[RequiredPkg.Class][RequiredPkg.Class]
+            pkg.Parent = Packages[RequiredPkg.Class][RequiredPkg.Category]
         else
-            Pkg.Parent = Packages[RequiredPkg.Class]
+            pkg.Parent = Packages[RequiredPkg.Class]
         end
     end
 end
@@ -117,7 +117,7 @@ local function LoadPkg(pkg)
     RequiredPkg.Settings = CopyTable(Settings)
     RequiredPkg.Core = Core
     RequiredPkg.Util = Injectables
-    RequiredPkg.API = Pkg.Util.API
+    RequiredPkg.API = RequiredPkg.Util.API
     RequiredPkg.Shared = Shared
     RequiredPkg.Plugins = PkgInfo.Class == "Command" and LoadedPkg.Plugin or nil
     
@@ -142,7 +142,7 @@ return function(userSettings, userPkgs)
     dLog("Info", "Welcome to V2")
     
     Remotes = Instance.new("Folder", ReplicatedStorage)
-    Remotes.name = "Remotes"
+    Remotes.Name = "Remotes"
     Instance.new("RemoteEvent", Remotes)
     Instance.new("RemoteFunction", Remotes)
     
@@ -154,28 +154,34 @@ return function(userSettings, userPkgs)
     Instance.new("Folder", Packages.Command).Name = "Player"
     Instance.new("Folder", Packages).Name = "Stylesheet"
     Instance.new("Folder", Packages).Name = "Plugin"
+    Instance.new("Folder", Packages.Plugin).Name = "Server"
+    Instance.new("Folder", Packages.Plugin).Name = "Player"
     
-    userSettings.name = "Settings"
+    userSettings.Name = "Settings"
     userSettings.Parent = Core
-    Settings = userSettings
+    Settings = require(userSettings)
     
     for _, Component in next, Core.Injectables:GetChildren() do
         if Component:IsA("ModuleScript") then
-            Injectables[Component.Name] = require(component)
+            Injectables[Component.Name] = require(Component)
         end
     end
     
     for _, Pkg in next, userPkgs:GetDescendants() do
-        InitPkg(Pkg)
+        if Pkg:IsA("ModuleScript") then
+            InitPkg(Pkg)
+        end
     end
     for _, Pkg in next, Packages:GetDescendants() do
-        LoadPkg(Pkg)
+        if Pkg:IsA("ModuleScript") then
+            LoadPkg(Pkg)
+        end
     end
     for _, Plugin in next, LoadedPkg.Plugin do
         InitPlugin(Plugin)
     end
     
-    Injectables.API.Initialize(Remotes)
+    Injectables.API.initialize(Remotes)
     
     for Name, Invoker in next, Invokers do
         Injectables.API.AddRemoteTask("Function", Name, Invoker)
@@ -183,7 +189,7 @@ return function(userSettings, userPkgs)
     
     Players.PlayerAdded:Connect(function(player)
         Injectables.API.InitializePlayer(player)
-    end
+    end)
     for _, Player in next, Players:GetPlayers() do
         Injectables.API.InitializePlayer(Player)
     end
