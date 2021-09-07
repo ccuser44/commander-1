@@ -6,8 +6,8 @@ local Package = {
     Category = "Server"
 }
 
-Package.Target = function(player, target, attachments)
-
+Package.Target = function(player, target, arguments)
+    
 end
 
 return Package
