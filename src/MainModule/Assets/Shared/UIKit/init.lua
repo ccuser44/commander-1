@@ -12,7 +12,7 @@ local Shared = script.Parent
 local strictify = require(Shared.strictify)
 
 -- Runtime code
-assert(RunService:IsClient, "Can be only required when RunService:IsClient() is true")
+assert(RunService:IsClient(), "Can be only required when RunService:IsClient() is true")
 
 -- Returns
 return strictify {
