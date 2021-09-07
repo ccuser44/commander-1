@@ -37,7 +37,11 @@ local LoadedPkg = {
 local Types = {
     assert = t.strict(boolean),
     CopyTable = t.strict(t.table),
-    CommandInvoker = t.strict(t.instanceIsA("Player"), t.string),
+    CommandInvoker = t.strict(t.instanceIsA("Player"), t.string, t.interface({
+        Name = t.string,
+        Category = t.string,
+        Attachments = t.any
+    })),
     InitPkg = t.strict(t.instanceIsA("ModuleScript")),
     LoadPkg = t.strict(t.instanceIsA("ModuleScript")),
     InitPlugin = t.strict(t.table),
@@ -66,22 +70,21 @@ local function CopyTable(table)
 	return Copy
 end
 
-function Invokers.OnCommand(player, requestType, ...)
-    Types.CommandInvoker(player, requestType)
+function Invokers.OnCommand(player, requestType, arguments)
+    Types.CommandInvoker(player, requestType, arguments)
 
-    local Arguments = {...}
-    local Name = table.remove(Arguments, 1)
-    local Category = table.remove(Arguments, 2)
+    local Name = table.remove(arguments, 1)
+    local Category = table.remove(arguments, 2)
     assert(table.find({"Server", "Player"}, Category), Category .. " is not a valid member of CommandCategory")
 
     local ErrorMessage = "No error message defined"
-    local Index = table.find(LoadedPkg.Command[Category], commandName)
+    local Index = table.find(LoadedPkg.Command[Category], Name)
     
     if Index then
         local UserGroup = Settings.Groups[player.AdminIndex]
         if table.find(UserGroup.Commands, Name) or table.find(UserGroup.Commands, "*") then
-            local Pkg = LoadedPkg.Commands[Category][CommandIndex]
-            return Pkg.Target(player, requestType, Arguments)
+            local Pkg = LoadedPkg.Commands[Category][Index]
+            return Pkg.Target(player, requestType, arguments)
         else
             ErrorMessage = "Insufficient permission"
         end
