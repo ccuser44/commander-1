@@ -68,11 +68,12 @@ end
 
 function Invokers.OnCommand(player, requestType, ...)
     Types.CommandInvoker(player, requestType)
-    assert(table.find({"Server", "Player"}, Category), Category .. " is not a valid member of CommandCategory")
 
     local Arguments = {...}
     local Name = table.remove(Arguments, 1)
     local Category = table.remove(Arguments, 2)
+    assert(table.find({"Server", "Player"}, Category), Category .. " is not a valid member of CommandCategory")
+
     local ErrorMessage = "No error message defined"
     local Index = table.find(LoadedPkg.Command[Category], commandName)
     
@@ -141,21 +142,32 @@ return function(userSettings, userPkgs)
     Types.Return(userSettings, userPkgs)
     dLog("Info", "Welcome to V2")
     
-    Remotes = Instance.new("Folder", ReplicatedStorage)
+    Remotes = Instance.new("Folder")
     Remotes.Name = "Remotes"
-    Instance.new("RemoteEvent", Remotes)
-    Instance.new("RemoteFunction", Remotes)
+    Remotes.Parent = ReplicatedStorage
+    Instance.new("RemoteEvent").Parent = Remotes
+    Instance.new("RemoteFunction").Parent = Remote
     
-    Packages = Instance.new("Folder", script)
+    Packages = Instance.new("Folder")
     Packages.Name = "Packages"
+    Packages.Parent = script
     
-    Instance.new("Folder", Packages).Name = "Command"
-    Instance.new("Folder", Packages.Command).Name = "Server"
-    Instance.new("Folder", Packages.Command).Name = "Player"
-    Instance.new("Folder", Packages).Name = "Stylesheet"
-    Instance.new("Folder", Packages).Name = "Plugin"
-    Instance.new("Folder", Packages.Plugin).Name = "Server"
-    Instance.new("Folder", Packages.Plugin).Name = "Player"
+    local Temp = nil -- temporary holder, will be gc'd eventually
+    Temp = Instance.new("Folder")
+    Temp.Name, Temp.Parent = "Command", Packages
+    Temp = Instance.new("Folder")
+    Temp.Name, Temp.Parent = "Server", Packages.Command
+    Temp = Instance.new("Folder")
+    Temp.Name, Temp.Parent = "Player", Packages.Command
+    Temp = Instance.new("Folder")
+    Temp.Name, Temp.Parent = "Stylesheet", Packages
+    Temp = Instance.new("Folder")
+    Temp.Name, Temp.Parent = "Plugin", Packages
+    Temp = Instance.new("Folder")
+    Temp.Name, Temp.Parent = "Server", Packages.Plugin
+    Temp = Instance.new("Folder")
+    Temp.Name, Temp.Parent = "Player", Packages.Plugin
+    Temp = nil
     
     userSettings.Name = "Settings"
     userSettings.Parent = Core
