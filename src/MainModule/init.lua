@@ -145,33 +145,25 @@ return function(userSettings, userPkgs)
     Types.Return(userSettings, userPkgs)
     dLog("Info", "Welcome to V2")
     
-    Remotes = Instance.new("Folder")
-    Remotes.Name = "Remotes"
-    Remotes.Parent = ReplicatedStorage
+    local function newObj(class, name, parent)
+    		local object = Instance.new(class)
+    		object.Name, object.Parent = name, parent
+    		return object
+    end
+    
+    Remotes = newObject("Folder", "Remotes", ReplicatedStorage)
     Instance.new("RemoteEvent").Parent = Remotes
     Instance.new("RemoteFunction").Parent = Remote
+    Packages = newObject("Folder", "Packages", script)
     
-    Packages = Instance.new("Folder")
-    Packages.Name = "Packages"
-    Packages.Parent = script
-    
-    local Temp = nil -- temporary holder, will be gc'd eventually
-    Temp = Instance.new("Folder")
-    Temp.Name, Temp.Parent = "Command", Packages
-    Temp = Instance.new("Folder")
-    Temp.Name, Temp.Parent = "Server", Packages.Command
-    Temp = Instance.new("Folder")
-    Temp.Name, Temp.Parent = "Player", Packages.Command
-    Temp = Instance.new("Folder")
-    Temp.Name, Temp.Parent = "Stylesheet", Packages
-    Temp = Instance.new("Folder")
-    Temp.Name, Temp.Parent = "Plugin", Packages
-    Temp = Instance.new("Folder")
-    Temp.Name, Temp.Parent = "Server", Packages.Plugin
-    Temp = Instance.new("Folder")
-    Temp.Name, Temp.Parent = "Player", Packages.Plugin
-    Temp = nil
-    
+    newObject("Folder", "Command", Packages)
+    newObject("Folder", "Server", Packages.Command)
+    newObject("Folder", "Player", Packages.Command)
+    newObject("Folder", "Stylesheet", Packages)
+    newObject("Folder", "Plugin", Packages)
+    newObject("Folder", "Server", Packages.Plugin)
+    newObject("Folder", "Player", Packages.Plugin)
+
     userSettings.Name = "Settings"
     userSettings.Parent = Core
     Settings = require(userSettings)
