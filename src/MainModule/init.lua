@@ -108,6 +108,12 @@ local function InitPkg(pkg)
     end
 end
 
+local function InjectEssentialData(table)
+	table.Settings = CopyTable(Settings)
+	table.Core, table.Util, table.API = Core, Injectables, table.Util.APIKit
+	table.Shared = Shared
+end
+
 local function LoadPkg(pkg)
     Types.InitPkg(pkg)
     
@@ -118,11 +124,7 @@ local function LoadPkg(pkg)
         PkgInfo[Name] = Value or void
     end
     
-    RequiredPkg.Settings = CopyTable(Settings)
-    RequiredPkg.Core = Core
-    RequiredPkg.Util = Injectables
-    RequiredPkg.API = RequiredPkg.Util.API
-    RequiredPkg.Shared = Shared
+    InjectEssentialData(pkg)
     RequiredPkg.Plugins = PkgInfo.Class == "Command" and LoadedPkg.Plugin or nil
     
     if table.find({"Command", "Plugin"}, PkgInfo.Class) then
