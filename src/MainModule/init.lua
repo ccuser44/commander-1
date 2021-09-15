@@ -190,19 +190,20 @@ return function(userSettings, userPkgs)
         InitPlugin(Plugin)
     end
     
-    Injectables.API.initialize(Remotes)
+    Injectables.APIKit.initialize(Remotes)
     
     for Name, Invoker in next, Invokers do
-        Injectables.API.AddRemoteTask("Function", Name, Invoker)
+        Injectables.APIKit.AddRemoteTask("Function", Name, Invoker)
     end
     
     Players.PlayerAdded:Connect(function(player)
-        Injectables.API.InitializePlayer(player)
+        Injectables.APIKit.InitializePlayer(player)
     end)
     for _, Player in next, Players:GetPlayers() do
-        Injectables.API.InitializePlayer(Player)
+        Injectables.APIKit.InitializePlayer(Player)
     end
     
     dLog("Success", "Loaded")
+    newObject = nil
     return true
 end
