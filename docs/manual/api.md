@@ -1,4 +1,8 @@
 # API
+
+!!! warning "Different naming"
+    The API has two name depending on its location. For packages who are using the linked API, use `pkg.Util.APIKit`, or `pkg.API`. Otherwise, find the API with the name `APIKit`.
+
 The API is a collection of reusable functions that helps to reduce the size of a package, or for developers to communicate with Commander externally. As the API is exposed to the server context, please be aware of backdoors, as they may have codes to intervene Commander.
 
 ## Use-cases
