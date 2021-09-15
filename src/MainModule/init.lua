@@ -18,7 +18,7 @@ local dLog = require(Core.dLog)
 local Validify = require(Core.Validify)
 local void = require(Core.Void)
 local t = require(Shared.t)
-local Settings = nil
+local Settings = nil -- reserved for later initialisations
 
 local Injectables = {}
 local Invokers = {}
