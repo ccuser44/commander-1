@@ -89,7 +89,7 @@ function API.InitializePlayer(player)
     if CollectionService:HasTag(player, "Commander_Loaded") then return end
     local GroupIndex, GroupName = API.GetAdminStatusWithUserId(player.UserId)
 
-    if groupIndex then
+    if GroupIndex then
         player:SetAttribute("Commander_AdminIndex", GroupIndex)
         player:SetAttribute("Commander_AdminGroup", GroupName)
         CollectionService:AddTag(player, "Commander_Admin")
