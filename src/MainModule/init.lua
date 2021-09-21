@@ -35,17 +35,17 @@ local LoadedPkg = {
 }
 
 local Types = {
-    assert = t.strict(boolean),
+    assert = t.strict(t.boolean),
     CopyTable = t.strict(t.table),
-    CommandInvoker = t.strict(t.instanceIsA("Player"), t.string, t.interface({
+    CommandInvoker = t.strict(t.tuple(t.instanceIsA("Player"), t.string, t.interface({
         Name = t.string,
         Category = t.string,
         Attachments = t.any
-    })),
+    }))),
     InitPkg = t.strict(t.instanceIsA("ModuleScript")),
     LoadPkg = t.strict(t.instanceIsA("ModuleScript")),
     InitPlugin = t.strict(t.table),
-    Return = t.strict(t.instanceIsA("ModuleScript"), t.instanceIsA("Folder"))
+    Return = t.strict(t.tuple(t.instanceIsA("ModuleScript"), t.instanceIsA("Folder")))
 }
 
 -- Functions
@@ -147,7 +147,7 @@ return function(userSettings, userPkgs)
     Types.Return(userSettings, userPkgs)
     dLog("Info", "Welcome to V2")
     
-    local function newObj(class, name, parent)
+    local function newObject(class, name, parent)
     		local object = Instance.new(class)
     		object.Name, object.Parent = name, parent
     		return object
@@ -155,7 +155,7 @@ return function(userSettings, userPkgs)
     
     Remotes = newObject("Folder", "Remotes", ReplicatedStorage)
     Instance.new("RemoteEvent").Parent = Remotes
-    Instance.new("RemoteFunction").Parent = Remote
+    Instance.new("RemoteFunction").Parent = Remotes
     Packages = newObject("Folder", "Packages", script)
     
     newObject("Folder", "Command", Packages)
