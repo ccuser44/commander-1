@@ -4,7 +4,7 @@ site_author: 'Evo Incorp'
 docs_dir: docs/
 repo_name: 'Repository'
 repo_url: 'https://github.com/evoincorp/commander'
-edit_uri: edit/v2/docs
+edit_uri: edit/main/docs
 plugins:
   - search
   - git-revision-date-localized
