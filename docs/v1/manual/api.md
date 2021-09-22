@@ -61,49 +61,49 @@ The API is constantly maintained by the Commander team, your packages always sta
     Sends a content filter request to Roblox, returns the status of the request, along with the result or the error messsage if the operation failed.
 
 #### message
-!!! abstract "`void` API.Players.message(`Player|string` To, `string` From, `string` Content, `number?` Duration)
+!!! abstract "`void` API.Players.message(`Player|string` To, `string` From, `string` Content, `number?` Duration)"
     Sends a centered message to the corresponding player(s), filter the content manually if needed.
 
 #### hint
-!!! abstract "`void` API.Players.hint(`Player|string` To, `string` From, `string` Content, `number?` Duration)
+!!! abstract "`void` API.Players.hint(`Player|string` To, `string` From, `string` Content, `number?` Duration)"
     Sends a less-disturbing notification to the corresponding player(s), filter the content manually if needed.
 
 #### notify
-!!! abstract "`void` API.Players.notify(`Player|string` To, `string` From, `string` Content)
+!!! abstract "`void` API.Players.notify(`Player|string` To, `string` From, `string` Content)"
     Sends a notification that is not time limited, at the bottom right corner.
 
     If you are looking for an option for user to interact with the notification, use `notifyWithAction`
 
 #### notifyWithAction
-!!! abstract "`BindableEvent` API.Players.notify(`Player|string` To, `string` Type, `string` From, `string` Content)
+!!! abstract "`BindableEvent` API.Players.notify(`Player|string` To, `string` Type, `string` From, `string` Content)"
     Like `notify`, but this returns a `BindableEvent`, which fires upon interaction ends.
 
 #### setTransparency
-!!! abstract "`void` API.Players.setTransparency(`Model` Character, `number` Alpha)
+!!! abstract "`void` API.Players.setTransparency(`Model` Character, `number` Alpha)"
     Sets the transparency of a character.
 
 #### checkPermission
-!!! abstract "`boolean` API.Players.checkPermission(`number` Player, `string` CommandName)
+!!! abstract "`boolean` API.Players.checkPermission(`number` Player, `string` CommandName)"
     Checks if the user is allowed to run the specific command, returns a boolean that indicates the status.
 
 #### getAdminStatus
-!!! abstract "`boolean` API.Players.getAdminStatus(`number` Player)
+!!! abstract "`boolean` API.Players.getAdminStatus(`number` Player)"
     Checks if user is allowed to use Commander.
 
 #### getAdminLevel
-!!! abstract "`string?` API.Players.getAdminLevel(`number` Player)
+!!! abstract "`string?` API.Players.getAdminLevel(`number` Player)"
     Gets user's level of authorization, returns `void` if the user is not authorized.
 
 #### getAdmins
-!!! abstract "`void` API.Players.getAdmins()
+!!! abstract "`void` API.Players.getAdmins()"
     Fetches a list of administrators defined in the Settings module
 
 #### getAvailableAdmins
-!!! abstract "`number` API.Players.getAvailableAdmins()
+!!! abstract "`number` API.Players.getAvailableAdmins()"
     Returns a number of administrators available in that server
 
 #### listenToPlayerAdded
-!!! abstract "`void` API.Players.listenToPlayerAdded(`function` Callback)
+!!! abstract "`void` API.Players.listenToPlayerAdded(`function` Callback)"
     Registers a callback to PlayerAdded event
 
 ### Global API
